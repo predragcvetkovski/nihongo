@@ -1,6 +1,4 @@
-# NihonGO30 - Your 30-Day Journey to Japanese Basics
-
-![NihonGO30](https://nihongo.site) 
+# [NihonGO30](https://nihongo.site) - Your 30-Day Journey to Japanese Basics
 
 ![Open-source language learning app powered by AI](/nihongo.png)
 
