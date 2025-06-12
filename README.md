@@ -1,7 +1,8 @@
 # NihonGO30 - Your 30-Day Journey to Japanese Basics
 
-![NihonGO30 Live](https://placehold.co/600x300/0f2027/9EC5FE/png?text=NihonGO30+App+Interface&font=poppins) 
-*(Image: Conceptual mockup of the NihonGO30 interface)*
+![NihonGO30](https://nihongo.site) 
+
+![Open-source language learning app powered by AI](/nihongo.png)
 
 ## Run Locally
 
@@ -16,7 +17,7 @@
 
 ## 🌟 Overview
 
-NihonGO30 is an interactive, Open-source web application designed to guide beginners through the fundamentals of the Japanese language over a structured 30-day plan. The project aims to make learning Japanese accessible, engaging, and effective by combining daily lessons, practical exercises, and modern AI-powered assistance.
+NihonGO30 is an Open-source, interactive, web application designed to guide beginners through the fundamentals of the Japanese language over a structured 30-day plan. The project aims to make learning Japanese accessible, engaging, and effective by combining daily lessons, practical exercises, and modern AI-powered assistance.
 
 Whether you're planning a trip to Japan, want to understand anime and manga in its original form, or are simply passionate about learning new languages, NihonGO30 provides a solid starting point.
 
