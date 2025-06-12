@@ -2,6 +2,26 @@
 
 ![Open-source language learning app powered by AI](/nihongo.png)
 
+
+## 🌟 Overview
+
+NihonGO30 is an Open-source, interactive, web application designed to guide beginners through the fundamentals of the Japanese language over a structured 30-day plan. The project aims to make learning Japanese accessible, engaging, and effective by combining daily lessons, practical exercises, and modern AI-powered assistance.
+
+Whether you're planning a trip to Japan, want to understand anime and manga in its original form, or are simply passionate about learning new languages, NihonGO30 provides a solid starting point.
+
+The name of the app, **Nihongo** (日本語), is the Japanese word for the "Japanese language."
+
+The name is a direct and fitting choice for an app designed to teach Japanese. It is broken down as follows:
+
+* **Nihon (日本):** This is the name for "Japan" in Japanese. It is composed of two kanji characters:
+    * **日 (ni):** meaning "sun" or "day."
+    * **本 (hon):** meaning "origin" or "root."
+    Together, they create the poetic meaning "Land of the Rising Sun."
+
+* **Go (語):** This kanji character is a suffix that means "language" or "word."
+
+Therefore, when you combine them, **Nihongo (日本語)** literally translates to "Japan language," or more simply, the Japanese language. Using this name for the app immediately communicates its purpose to anyone familiar with the term.
+
 ## Run Locally
 
 **Prerequisites:**  Node.js
@@ -12,12 +32,6 @@
 3. Run the app:
    `npm run dev`
 
-
-## 🌟 Overview
-
-NihonGO30 is an Open-source, interactive, web application designed to guide beginners through the fundamentals of the Japanese language over a structured 30-day plan. The project aims to make learning Japanese accessible, engaging, and effective by combining daily lessons, practical exercises, and modern AI-powered assistance.
-
-Whether you're planning a trip to Japan, want to understand anime and manga in its original form, or are simply passionate about learning new languages, NihonGO30 provides a solid starting point.
 
 ## 🎯 Goal of the Project
 
