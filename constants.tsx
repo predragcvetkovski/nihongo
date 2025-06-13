@@ -117,7 +117,7 @@ export const LightBulbIcon: React.FC<IconProps> = ({ className, ...rest }) => (
     className={className}
     {...rest}
   >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.311V21m-3.75-2.311V21m0 0a2.25 2.25 0 01-2.25-2.25V15m2.25 2.25V15m0 0a2.25 2.25 0 012.25-2.25V15m2.25 2.25V15m0 0A2.25 2.25 0 0112 9.75V15m0 0a2.25 2.25 0 002.25 2.25M12 15V9.75M12 9.75c0-3.032 2.228-5.5 5.25-5.5S22.5 6.718 22.5 9.75c0 3.032-2.228 5.5-5.25 5.5S12 12.782 12 9.75M1.5 9.75c0-3.032 2.228-5.5 5.25-5.5S12 6.718 12 9.75c0 3.032-2.228 5.5-5.25 5.5S1.5 12.782 1.5 9.75" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.311V21m-3.75-2.311V21m0 0a2.25 2.25 0 01-2.25-2.25V15m2.25 2.25V15m0 0a2.25 2.25 0 012.25-2.25V15m2.25 2.25V15m0 0A2.25 2.25 0 0112 9.75V15m0 0a2.25 2.25 0 002.25 2.25M12 15V9.75M12 9.75c0-3.032 2.228-5.5 5.25-5.5S22.5 6.718 22.5 9.75c0 3.032-2.228 5.5-5.25 5.5S1.5 12.782 1.5 9.75" />
   </svg>
 );
 
@@ -146,5 +146,75 @@ export const PencilSquareIcon: React.FC<IconProps> = ({ className, ...rest }) =>
     {...rest}
   >
     <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+  </svg>
+);
+
+export const PaperAirplaneIcon: React.FC<IconProps> = ({ className, ...rest }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    className={className}
+    {...rest}
+  >
+    <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+  </svg>
+);
+
+export const MicrophoneIcon: React.FC<IconProps> = ({ className, ...rest }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    className={className}
+    {...rest}
+  >
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
+  </svg>
+);
+
+export const StarIcon: React.FC<IconProps> = ({ className, ...rest }) => (
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    fill="none" 
+    viewBox="0 0 24 24" 
+    strokeWidth={1.5} 
+    stroke="currentColor" 
+    className={className}
+    {...rest}
+  >
+    <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.82.61l-4.725-2.885a.563.563 0 00-.652 0l-4.725 2.885a.562.562 0 01-.82-.61l1.285-5.385a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+  </svg>
+);
+
+export const ChevronLeftIcon: React.FC<IconProps> = ({ className, ...rest }) => (
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    fill="none" 
+    viewBox="0 0 24 24" 
+    strokeWidth={1.5} 
+    stroke="currentColor" 
+    className={className}
+    {...rest}
+  >
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+  </svg>
+);
+
+export const ChevronRightIcon: React.FC<IconProps> = ({ className, ...rest }) => (
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    fill="none" 
+    viewBox="0 0 24 24" 
+    strokeWidth={1.5} 
+    stroke="currentColor" 
+    className={className}
+    {...rest}
+  >
+    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
   </svg>
 );

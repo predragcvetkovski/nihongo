@@ -1,6 +1,8 @@
 {
   "name": "NihonGO30",
   "description": "Learn Japanese with NihonGO30. Structured daily lessons and AI-powered practice using the Gemini API.",
-  "requestFramePermissions": [],
+  "requestFramePermissions": [
+    "microphone"
+  ],
   "prompt": ""
 }

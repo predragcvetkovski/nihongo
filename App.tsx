@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -5,14 +6,17 @@ import DayCard from './components/DayCard';
 import LessonModal from './components/LessonModal';
 import ProgressBar from './components/ProgressBar';
 import SRSReviewModal from './components/SRSReviewModal';
-import WritingPracticeModal from './components/WritingPracticeModal'; // Import new modal
+import WritingPracticeModal from './components/WritingPracticeModal'; 
+import IntroStreamModal from './components/IntroStreamModal'; // Import new Intro Modal
+import GitHubStarSection from './components/GitHubStarSection'; // Import the new GitHubStarSection
 import { thirtyDayPlan } from './services/lessonData';
-import { LessonDay, ContentBlockType, VocabularyListContentBlock, UserVocabularySrsData, SrsLevel, VocabularyItem, KanaCharacter } from './types'; // Add KanaCharacter
+import { LessonDay, ContentBlockType, VocabularyListContentBlock, UserVocabularySrsData, SrsLevel, VocabularyItem, KanaCharacter } from './types'; 
 import { LESSON_DAYS_TOTAL, BookOpenIcon } from './constants'; 
 
 const ALL_LESSONS_STORAGE_KEY = 'allNihongoLessons'; 
 const COMPLETED_DAYS_STORAGE_KEY = 'completedJapanDays';
 const SRS_DATA_STORAGE_KEY = 'nihongoSrsData';
+const HAS_SEEN_INTRO_KEY = 'hasSeenIntroNihonGO30'; // Key for intro stream
 
 
 // Create placeholder days if thirtyDayPlan is shorter than LESSON_DAYS_TOTAL
@@ -40,17 +44,35 @@ const App: React.FC = () => {
   const [completedDays, setCompletedDays] = useState<number[]>([]);
   const [userSrsData, setUserSrsData] = useState<UserVocabularySrsData>({});
   const [showSrsModal, setShowSrsModal] = useState(false);
-  const [practiceChar, setPracticeChar] = useState<KanaCharacter | null>(null); // State for writing practice modal
+  const [practiceChar, setPracticeChar] = useState<KanaCharacter | null>(null);
+  const [showIntroStream, setShowIntroStream] = useState<boolean>(false); // State for intro
 
   // Load data from localStorage
   useEffect(() => {
     const storedCompletedDays = localStorage.getItem(COMPLETED_DAYS_STORAGE_KEY);
     if (storedCompletedDays) {
-      setCompletedDays(JSON.parse(storedCompletedDays));
+      try {
+        setCompletedDays(JSON.parse(storedCompletedDays));
+      } catch (error) {
+        console.error("Failed to parse completed days from localStorage. Resetting to default.", error);
+        setCompletedDays([]); 
+      }
     }
+
     const storedSrsData = localStorage.getItem(SRS_DATA_STORAGE_KEY);
     if (storedSrsData) {
-      setUserSrsData(JSON.parse(storedSrsData));
+      try {
+        setUserSrsData(JSON.parse(storedSrsData));
+      } catch (error) {
+        console.error("Failed to parse SRS data from localStorage. Resetting to default.", error);
+        setUserSrsData({}); 
+      }
+    }
+    
+    // Check if intro has been seen
+    const hasSeenIntro = localStorage.getItem(HAS_SEEN_INTRO_KEY);
+    if (!hasSeenIntro) {
+      setShowIntroStream(true);
     }
   }, []);
 
@@ -150,17 +172,23 @@ const App: React.FC = () => {
     setPracticeChar(null);
   }, []);
 
+  const handleCloseIntroStream = useCallback(() => {
+    setShowIntroStream(false);
+    localStorage.setItem(HAS_SEEN_INTRO_KEY, 'true');
+  }, []);
+
   const highestUnlockableDay = completedDays.length > 0 ? Math.max(...completedDays) + 1 : 1;
 
   return (
-    <div className="min-h-screen flex flex-col font-sans"> {/* Added font-sans */}
+    <div className="min-h-screen flex flex-col font-sans">
+      {showIntroStream && <IntroStreamModal onClose={handleCloseIntroStream} />}
       <Header />
       <main className="flex-grow container mx-auto px-4 py-8">
-        <p className="text-center text-lg text-gray-200 mb-2">
-          30-Day Japanese Challenge
+        <p className="text-center text-2xl text-gray-100 mb-2 font-semibold">
+          Your 30-Day Journey into Japanese!
         </p>
         <p className="text-center text-sm text-gray-400 mb-6">
-          Learn Japanese through structured daily lessons, AI practice, and vocabulary review.
+          Follow structured daily lessons, AI challenges, and vocabulary quests.
         </p>
         
         <ProgressBar completedDays={completedDays.length} totalDays={LESSON_DAYS_TOTAL} />
@@ -170,6 +198,8 @@ const App: React.FC = () => {
             <button
               onClick={() => setShowSrsModal(true)}
               className="bg-purple-600/70 hover:bg-purple-500/80 backdrop-filter backdrop-blur-md border border-purple-500/50 text-white font-semibold py-3 px-8 rounded-xl inline-flex items-center text-lg transition-all duration-300 shadow-lg hover:shadow-purple-400/40 transform hover:scale-105"
+              aria-expanded={showSrsModal}
+              aria-controls="srs-review-modal"
             >
               <BookOpenIcon className="h-6 w-6 mr-3" /> Review Vocabulary ({vocabularyForReview.length} items)
             </button>
@@ -180,6 +210,7 @@ const App: React.FC = () => {
           {allLessonDaysInitial.map((day) => {
             const isCompleted = completedDays.includes(day.day);
             const isLocked = day.day > 1 && day.day > highestUnlockableDay && !isCompleted;
+            const isNextNewDay = !isLocked && !isCompleted && day.day === highestUnlockableDay;
             
             return (
               <DayCard
@@ -188,11 +219,13 @@ const App: React.FC = () => {
                 isCompleted={isCompleted}
                 onSelectDay={handleSelectDay}
                 isLocked={isLocked}
+                isNextNewDay={isNextNewDay} 
               />
             );
           })}
         </div>
       </main>
+      <GitHubStarSection />
       <Footer />
       {selectedLesson && (
         <LessonModal
@@ -200,7 +233,7 @@ const App: React.FC = () => {
           onClose={handleCloseModal}
           onMarkComplete={handleMarkComplete}
           isCompleted={completedDays.includes(selectedLesson.day)}
-          onStartWritingPractice={handleOpenWritingPractice} // Pass handler
+          onStartWritingPractice={handleOpenWritingPractice} 
         />
       )}
       {showSrsModal && vocabularyForReview.length > 0 && (
@@ -212,7 +245,7 @@ const App: React.FC = () => {
           updateSrsData={handleUpdateSrsData}
         />
       )}
-      {practiceChar && ( // Render the new writing practice modal
+      {practiceChar && ( 
         <WritingPracticeModal
           character={practiceChar}
           onClose={handleCloseWritingPractice}

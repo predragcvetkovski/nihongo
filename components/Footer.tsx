@@ -3,7 +3,7 @@ import { APP_TITLE_PREFIX, APP_TITLE_ACCENT, APP_TITLE_SUFFIX } from '../constan
 
 const Footer: React.FC = () => {
   return (
-    <footer className="bg-black/30 backdrop-filter backdrop-blur-md text-gray-400 p-6 mt-12 text-center border-t border-white/10 font-sans">
+    <footer className="bg-black/30 backdrop-filter backdrop-blur-md text-gray-400 p-6 text-center border-t border-white/10 font-sans">
       <div className="flex items-center justify-center">
         <span>
           © {new Date().getFullYear()} {APP_TITLE_PREFIX}
@@ -12,6 +12,7 @@ const Footer: React.FC = () => {
         </span>
       </div>
       <p className="text-xs mt-1">AI-Powered Japanese Learning.</p>
+      <p className="text-xs mt-2">Published by <a href="https://nihongo.site" target="_blank" rel="noopener noreferrer" className="text-sky-400 hover:text-sky-300">Nihongo.site</a></p>
     </footer>
   );
 };

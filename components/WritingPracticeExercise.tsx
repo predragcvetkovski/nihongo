@@ -9,29 +9,31 @@ interface WritingPracticeExerciseProps {
 
 const WritingPracticeExercise: React.FC<WritingPracticeExerciseProps> = ({ block }) => {
   return (
-    <div className="my-6 glassmorphic-card font-sans text-gray-100 p-6"> {/* Use custom class, added padding */}
-      <div className="flex flex-col items-center space-y-6"> {/* Main vertical stack, centered items */}
+    <div className="glassmorphic-card p-6 my-6 font-sans text-gray-100">
+      <div className="flex flex-col items-center space-y-6">
         
-        <div className="text-center"> {/* Centering title and instructions */}
-          <h3 className="text-2xl font-semibold text-sky-200 mb-2">
+        <div className="text-center">
+          <h3 className="text-xl font-semibold text-sky-300 mb-2">
             {block.title || `Practice Writing: ${block.characterToPractice.char}`}
           </h3>
           {block.instructions && (
-            <p className="text-gray-300 mb-4 text-sm max-w-md mx-auto">{block.instructions}</p>
+            <div className="p-3 bg-slate-800/40 rounded-lg border border-slate-700 mt-2 mb-4">
+              <p className="text-sm text-gray-300 max-w-md mx-auto">{block.instructions}</p>
+            </div>
           )}
         </div>
 
         <StrokeOrderDisplay 
           character={block.characterToPractice} 
-          imageClassName="w-40 h-40" // Updated to square dimensions
-          textClassName="text-5xl md:text-6xl"
+          imageClassName="w-40 h-40 bg-white rounded-md shadow-lg border-2 border-slate-400"
+          textClassName="text-5xl md:text-6xl text-gray-50" // Ensure text is visible
+          className="p-2 bg-slate-700/50 rounded-lg shadow-inner"
         />
         
         <WritingPracticeCanvas 
           characterToPractice={block.characterToPractice.char}
-          // Using character's strokeOrderDiagramUrl as default guidance if specific guidanceImageUrl isn't set for the block
           guidanceImageUrl={block.guidanceImageUrl || block.characterToPractice.strokeOrderDiagramUrl} 
-          width={280} // Slightly larger canvas for vertical layout
+          width={280}
           height={280}
           canvasId={`writing-canvas-${block.id}`}
         />

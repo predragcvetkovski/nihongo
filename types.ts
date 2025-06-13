@@ -14,10 +14,13 @@ export enum ContentBlockType {
   KANA_INFO = 'KANA_INFO',
   VOCABULARY_LIST = 'VOCABULARY_LIST',
   GRAMMAR_EXPLANATION = 'GRAMMAR_EXPLANATION',
-  GEMINI_PRACTICE = 'GEMINI_PRACTICE',
+  GEMINI_PRACTICE = 'GEMINI_PRACTICE', // Will be phased out by AI_TUTOR_STREAM
   CULTURAL_NOTE = 'CULTURAL_NOTE',
   FILL_IN_THE_BLANK_EXERCISE = 'FILL_IN_THE_BLANK_EXERCISE',
   WRITING_PRACTICE = 'WRITING_PRACTICE',
+  PRONUNCIATION_PRACTICE = 'PRONUNCIATION_PRACTICE', // Will be phased out by AI_TUTOR_STREAM
+  AI_TUTOR_STREAM = 'AI_TUTOR_STREAM', // New type for interactive AI tutor
+  INTERESTING_FACT = 'INTERESTING_FACT', // New type for interesting facts/stories
 }
 
 export interface BaseContentBlock {
@@ -37,8 +40,8 @@ export interface KanaCharacter {
   exampleWord?: string;
   exampleRomaji?: string;
   exampleMeaning?: string;
-  audioSrc?: string; // For pre-recorded audio, primarily will use TTS
-  strokeOrderDiagramUrl?: string; // URL to an image/gif showing stroke order
+  audioSrc?: string; 
+  strokeOrderDiagramUrl?: string; 
   strokeCount?: number;
 }
 export interface KanaInfoContentBlock extends BaseContentBlock {
@@ -49,14 +52,14 @@ export interface KanaInfoContentBlock extends BaseContentBlock {
 }
 
 export interface VocabularyItem {
-  id: string; // Unique ID, e.g., "day1-vocab-0"
+  id: string; 
   japanese: string;
   romaji: string;
   meaning: string;
   exampleSentence?: string; 
   exampleSentenceRomaji?: string;
   exampleSentenceMeaning?: string;
-  audioSrc?: string; // For pre-recorded audio, primarily will use TTS
+  audioSrc?: string; 
 }
 
 export interface VocabularyListContentBlock extends BaseContentBlock {
@@ -66,8 +69,8 @@ export interface VocabularyListContentBlock extends BaseContentBlock {
 
 export interface GrammarExplanationContentBlock extends BaseContentBlock {
   type: ContentBlockType.GRAMMAR_EXPLANATION;
-  explanation: string; // Markdown supported
-  exampleSentences: VocabularyItem[]; // Reusing VocabularyItem for structure, id might not be relevant here or could be "grammar-ex-N"
+  explanation: string; 
+  exampleSentences: VocabularyItem[]; 
 }
 
 export interface GeminiPracticeContentBlock extends BaseContentBlock {
@@ -81,21 +84,42 @@ export interface GeminiPracticeContentBlock extends BaseContentBlock {
 
 export interface CulturalNoteContentBlock extends BaseContentBlock {
   type: ContentBlockType.CULTURAL_NOTE;
-  note: string; // Markdown supported
+  note: string; 
 }
 
 export interface FillInTheBlankExerciseBlock extends BaseContentBlock {
   type: ContentBlockType.FILL_IN_THE_BLANK_EXERCISE;
-  sentenceParts: (string | null)[]; // Array of strings and null (for blank). e.g., ["猫は", null, "です。"]
+  sentenceParts: (string | null)[]; 
   correctAnswer: string;
-  explanation?: string; // Explanation for the correct answer
+  explanation?: string; 
 }
 
 export interface WritingPracticeBlock extends BaseContentBlock {
   type: ContentBlockType.WRITING_PRACTICE;
   characterToPractice: KanaCharacter;
-  instructions?: string; // e.g., "Practice writing 'あ'. Pay attention to stroke order and balance."
-  guidanceImageUrl?: string; // Optional image to display as faint background in canvas
+  instructions?: string; 
+  guidanceImageUrl?: string; 
+}
+
+export interface PronunciationPracticeContentBlock extends BaseContentBlock {
+  type: ContentBlockType.PRONUNCIATION_PRACTICE;
+  instructionText: string;
+  targetPhraseJapanese: string;
+  targetPhraseRomaji: string;
+  geminiSystemInstruction?: string; 
+}
+
+export interface AiTutorStreamContentBlock extends BaseContentBlock {
+  type: ContentBlockType.AI_TUTOR_STREAM;
+  initialSystemPrompt: string;
+  placeholderText?: string;
+}
+
+export interface InterestingFactContentBlock extends BaseContentBlock {
+  type: ContentBlockType.INTERESTING_FACT;
+  storyTitle: string;
+  storyMarkdown: string;
+  relatedVocabularyIds: string[]; // IDs of VocabularyItem from the same lesson
 }
 
 export type LessonContentBlock = 
@@ -103,10 +127,13 @@ export type LessonContentBlock =
   | KanaInfoContentBlock 
   | VocabularyListContentBlock 
   | GrammarExplanationContentBlock 
-  | GeminiPracticeContentBlock 
+  | GeminiPracticeContentBlock // Keep for backward compatibility if any old data exists
   | CulturalNoteContentBlock
   | FillInTheBlankExerciseBlock
-  | WritingPracticeBlock;
+  | WritingPracticeBlock
+  | PronunciationPracticeContentBlock // Keep for backward compatibility
+  | AiTutorStreamContentBlock
+  | InterestingFactContentBlock; // Added new block type
 
 export interface LessonDay {
   day: number;
@@ -122,18 +149,27 @@ export interface GeminiResponse {
   error?: string;
 }
 
-// SRS Data Structure
 export enum SrsLevel {
   NEW = 0,
-  LEARNING = 1, // Reviewed once or twice, still shaky
-  KNOWN = 2,    // Fairly comfortable
-  MASTERED = 3  // Confidently known
+  LEARNING = 1, 
+  KNOWN = 2,    
+  MASTERED = 3  
 }
 
 export interface UserVocabularySrsEntry {
   srsLevel: SrsLevel;
-  lastReviewed?: string; // ISO date string
-  nextReview?: string;   // ISO date string (for more complex scheduling)
+  lastReviewed?: string; 
+  nextReview?: string;   
 }
 
-export type UserVocabularySrsData = Record<string, UserVocabularySrsEntry>; // Keyed by VocabularyItem.id
+export type UserVocabularySrsData = Record<string, UserVocabularySrsEntry>; 
+
+// For AiTutorStream component
+export interface ChatMessage {
+  id: string;
+  sender: 'user' | 'ai';
+  text?: string; // Text content of the message
+  audioUrl?: string; // URL for user's recorded audio
+  isThinking?: boolean; // AI is processing indicator
+  isError?: boolean;
+}

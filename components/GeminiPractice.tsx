@@ -41,19 +41,21 @@ const GeminiPractice: React.FC<GeminiPracticeProps> = ({ block }) => {
     return text.split('\n').map((line, index) => (
       <React.Fragment key={index}>
         {line}
-        <br />
+        {index < text.split('\n').length - 1 && <br />}
       </React.Fragment>
     ));
   };
 
 
   return (
-    <div className="my-6 glassmorphic-card font-sans text-gray-100"> {/* Use custom class */}
-      <h4 className="text-xl font-semibold text-sky-300 mb-3 flex items-center">
-        <SparklesIcon className="h-6 w-6 mr-2 text-sky-300" />
+    <div className="glassmorphic-card p-6 my-6 font-sans text-gray-100">
+      <h4 className="text-lg font-semibold text-sky-300 mb-3 flex items-center">
+        <SparklesIcon className="h-6 w-6 mr-2 text-yellow-400" />
         {block.title || 'AI Practice Zone'}
       </h4>
-      <p className="text-gray-300 mb-4 text-sm">{block.instructionText}</p>
+      <div className="p-3 bg-slate-800/40 rounded-lg mb-4 border border-slate-700">
+        <p className="text-sm text-gray-300">{block.instructionText}</p>
+      </div>
       
       {block.requiresUserInput && (
         <div className="mb-4">
@@ -66,7 +68,7 @@ const GeminiPractice: React.FC<GeminiPracticeProps> = ({ block }) => {
             onChange={(e) => setUserInput(e.target.value)}
             placeholder={block.placeholder || "Type your answer here..."}
             rows={3}
-            className="w-full p-3 bg-black/30 backdrop-filter backdrop-blur-sm border border-white/20 rounded-lg text-gray-100 focus:ring-2 focus:ring-sky-400 focus:border-sky-400 transition-shadow font-japanese" // font-japanese for potential Japanese input
+            className="w-full p-3 bg-slate-700/60 border border-slate-600 rounded-lg text-gray-100 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-shadow font-japanese"
             lang="ja" 
           />
         </div>
@@ -75,28 +77,28 @@ const GeminiPractice: React.FC<GeminiPracticeProps> = ({ block }) => {
       <button
         onClick={handleSubmit}
         disabled={isLoading || (block.requiresUserInput && !userInput.trim())}
-        className="w-full flex items-center justify-center bg-sky-500/60 hover:bg-sky-400/70 backdrop-filter backdrop-blur-sm border border-sky-400/60 disabled:bg-sky-700/40 disabled:text-sky-400 disabled:border-sky-600/40 text-white font-semibold py-2.5 px-4 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-opacity-50"
+        className="w-full flex items-center justify-center bg-sky-600 hover:bg-sky-700 border border-sky-700 disabled:bg-slate-600 disabled:text-gray-400 disabled:border-slate-500 text-white font-semibold py-2.5 px-4 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-opacity-50"
       >
         {isLoading ? (
            <ArrowPathIcon className="animate-spin h-5 w-5 mr-2" />
         ) : (
           <SparklesIcon className="h-5 w-5 mr-2" />
         )}
-        {isLoading ? 'Thinking...' : (block.requiresUserInput ? 'Send to Gemini' : 'Ask Gemini')}
+        {isLoading ? 'Thinking...' : (block.requiresUserInput ? 'Send to AI' : 'Ask AI')}
       </button>
 
       {error && <ErrorDisplay message={error} />}
       
       {geminiData && (
-        <div className="mt-5 p-4 bg-black/30 backdrop-filter backdrop-blur-sm rounded-lg border border-white/20">
-          <h5 className="text-md font-semibold text-sky-200 mb-2">Gemini's Response:</h5>
+        <div className="mt-5 p-4 bg-slate-700/50 rounded-lg border border-slate-600">
+          <h5 className="text-md font-semibold text-sky-300 mb-2">AI Response:</h5>
           {geminiData.text && (
-            <div className="text-gray-200 whitespace-pre-wrap leading-relaxed">
+            <div className="text-gray-200 whitespace-pre-wrap leading-relaxed p-3 bg-black/30 rounded-md">
               {formatGeminiTextResponse(geminiData.text)}
             </div>
           )}
           {geminiData.json && (
-            <pre className="text-gray-200 whitespace-pre-wrap bg-black/40 p-3 rounded-md text-sm overflow-x-auto border border-white/10">
+            <pre className="text-gray-200 whitespace-pre-wrap bg-slate-800 p-3 rounded-md text-sm overflow-x-auto border border-slate-700">
               {JSON.stringify(geminiData.json, null, 2)}
             </pre>
           )}

@@ -4,37 +4,87 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NihonGO30 - Learn Japanese</title> 
+  <meta name="description" content="Learn Japanese with NihonGO30. Structured daily lessons and AI-powered practice using the Gemini API.">
+  <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iI0VGNDQ0NCIvPjwvc3ZnPg==" type="image/svg+xml">
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/manifest.json">
+
+  <!-- PWA Theme Color -->
+  <meta name="theme-color" content="#203a43">
+
+  <!-- Apple PWA Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="NihonGO30">
+  <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABS3GwHAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAmpJREFUeJzt2bFNHFkUx/HfE0joDLGAYyEO4ARQCjgFHAKOCh1wFHCUsGAjLAh7YWMsCDEcZzL5Hq9XvVtdX9P1dGccY4wxZlPaaR14CjzP4xZgwL3ieA8MOGBFPA4GHLCiHgcDDlhRj4MBByyo2yPwjOfx7wL+A3jDDEjPArw6w8Azy5kDr4CAm+A6sGAL8GgC3gMfAR+BN8DL4PXgMfBucB0Y8AZ4E7gOvAZeBW8Cd4HXwVvA4xjwPPAWeBW8DVwG3gVfAx8CV4HTwAvgZeAycBW4CRwFbgFXgVfAReAO8BFwA3gCvA5cBW4CLwM3gGPAjeA6cBGYAS8DN4GrwG3gIvAKeAW8DF4GbgCbgVfAdWACPAxcBG4Ct4CLwDXgKnARuAK8DVwCfgSuAG8DN4EbgeuAQ8Ct4DrwCrgOvAFcBK4DB4HXwDXgOvA6eA28BVwFrgNHAUeBK8DVwHXgIvA6cBG4DrwMXgauA8eBK8DF4A7wJXAZuAO8DVwGbgMfgZcMx8CRDEgmPAKODAGPZoADQ4AjGXA0AxwYAhzJgKMYcGAIcGQVYDBgYBBgMGZgEGASYDAYMDALMBAwMAgwMAsxMCwYGBYMjALLDArsFgyMCgwCDEwKDAIMjAqMArsGRwZHAwYmBUcDBkYFRwEGJgVHAQbGB0YBBsYHhgEGxgeGAQbGR0YBBsZHhgEGx2YMAgxOzRwEGJ2eOAgyOTQwCDI5PHYQYnJg6CDA4MXUQYHBi6iDA4OTgIMDg5OAgwODU1CDA4NTUIMBg1NoMwGDU2gzAYNTaDMAg1NoMwCDY2CSNQagsxMAs1MFsQYGACDwYAPsLsWq4m0P0AAAAASUVORK5CYII="> 
+  
+  <!-- Basic SEO and Social Sharing Meta Tags -->
+  <meta property="og:title" content="NihonGO30 - Learn Japanese in 30 Days">
+  <meta property="og:description" content="Master Japanese basics with a structured 30-day plan, AI-powered practice, and interactive lessons. Start your NihonGO30 journey today!">
+  <meta property="og:image" content="https://github.com/predragcvetkovski/nihongo/raw/main/nihongo.png">
+  <meta property="og:url" content="/"> 
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="NihonGO30 - Learn Japanese in 30 Days">
+  <meta name="twitter:description" content="Master Japanese basics with a structured 30-day plan, AI-powered practice, and interactive lessons. Start your NihonGO30 journey today!">
+  <meta name="twitter:image" content="https://github.com/predragcvetkovski/nihongo/raw/main/nihongo.png">
+
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
       darkMode: 'class', // or 'media'
-      // theme.extend is largely removed as the new style block controls many of these aspects.
-      // Specific Tailwind utilities will still be used.
     }
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- Updated font import -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
   
-  <!-- Embedded styles from user prompt -->
+  <!-- Embedded styles -->
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Noto+Sans+JP:wght@400;700&display=swap');
     body { margin: 0; }
     .font-sans { font-family: 'Poppins', sans-serif; }
     .font-japanese { font-family: 'Noto Sans JP', sans-serif; }
+
     .background-gradient { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(120deg, #0f2027 0%, #203a43 50%, #2c5364 100%); z-index: -1; }
+    
     .glassmorphic-card { background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border-radius: 1rem; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); padding: 1.5rem; }
     .glassmorphic-card-inner { background: rgba(0, 0, 0, 0.25); border-radius: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.08); transition: background 0.2s ease; }
     .glassmorphic-card-inner:hover { background: rgba(0, 0, 0, 0.35); }
     .glassmorphic-selected { background: rgba(59, 130, 246, 0.6); border-color: rgba(96, 165, 250, 0.6); }
     .glassmorphic-unlocked { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-    .glassmorphic-unlocked:hover { background: rgba(255, 255, 255, 0.2); }
+    .glassmorphic-unlocked:hover { background: rgba(255, 255, 255, 0.2); transform: translateY(-3px) scale(1.02); }
     .glassmorphic-completed { background: rgba(22, 101, 52, 0.6); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(34, 197, 94, 0.5); box-shadow: 0 4px 15px rgba(22, 101, 52, 0.3); }
-    .glassmorphic-completed:hover { background: rgba(22, 101, 52, 0.7); }
+    .glassmorphic-completed:hover { background: rgba(22, 101, 52, 0.7); transform: translateY(-3px) scale(1.02);}
     .glassmorphic-locked { background: rgba(17, 24, 39, 0.6); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); border: 1px solid rgba(255, 255, 255, 0.05); cursor: not-allowed; }
+    
     .toast-enter { animation: slide-in 0.5s forwards; }
     @keyframes slide-in { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+    /* Shimmer effect for GitHub star link */
+    @keyframes shimmerAnimation {
+      0% { transform: translateX(-150%) skewX(-30deg); } /* Start further left */
+      100% { transform: translateX(150%) skewX(-30deg); } /* End further right */
+    }
+
+    .shimmer-link-active {
+      position: relative;
+      overflow: hidden;
+      /* display: inline-flex; /* Ensure ::before aligns correctly if link is inline-flex */
+    }
+
+    .shimmer-link-active::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0; /* Will be animated via transform */
+      width: 50%; /* Width of the shimmer itself */
+      height: 100%;
+      background: linear-gradient(to right, transparent 0%, rgba(255,255,255,0.08) 30%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.08) 70%, transparent 100%);
+      animation: shimmerAnimation 2.5s infinite linear;
+      opacity: 0.7; /* Make shimmer a bit more subtle */
+    }
+
   </style>
 <script type="importmap">
 {
@@ -42,15 +92,81 @@
     "react/": "https://esm.sh/react@^19.1.0/",
     "react": "https://esm.sh/react@^19.1.0",
     "@google/genai": "https://esm.sh/@google/genai@^1.4.0",
-    "react-dom/": "https://esm.sh/react-dom@^19.1.0/"
+    "react-dom/": "https://esm.sh/react-dom@^19.1.0/",
+    "@modelcontextprotocol/sdk": "https://esm.sh/@modelcontextprotocol/sdk"
   }
 }
 </script>
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "url": "/", 
+        "name": "NihonGO30 - Learn Japanese in 30 Days",
+        "description": "Learn Japanese with NihonGO30. Structured daily lessons, interactive exercises, and AI-powered practice using the Gemini API to master Japanese basics.",
+        "isPartOf": {
+          "@type": "WebApplication",
+          "@id": "#nihongo30app"
+        },
+        "primaryImageOfPage": {
+          "@type": "ImageObject",
+          "url": "https://github.com/predragcvetkovski/nihongo/raw/main/nihongo.png",
+          "caption": "NihonGO30 Application Interface showing lesson cards and progress."
+        },
+        "keywords": "Japanese language, learn Japanese, Hiragana, Katakana, Kanji, AI learning, Gemini API, 30-day Japanese course, Japanese for beginners",
+        "inLanguage": "en", 
+        "mainEntity": { "@id": "#nihongo30app" }
+      },
+      {
+        "@type": "WebApplication",
+        "@id": "#nihongo30app",
+        "name": "NihonGO30",
+        "description": "An interactive web application designed to guide beginners through the fundamentals of the Japanese language over a structured 30-day plan, featuring AI-powered practice and interactive exercises.",
+        "applicationCategory": ["EducationApplication", "LanguageLearningApplication", "ProductivityApplication"],
+        "learningResourceType": ["Course", "Language Learning Resource", "InteractiveResource"],
+        "operatingSystem": "All (Web-based PWA)", 
+        "browserRequirements": "Requires a modern web browser with HTML5, CSS3, and JavaScript support.",
+        "image": "https://github.com/predragcvetkovski/nihongo/raw/main/nihongo.png",
+        "url": "/", 
+        "offers": {
+          "@type": "Offer",
+          "price": "0", 
+          "priceCurrency": "USD" 
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Nihongo.site",
+          "url": "https://nihongo.site",
+           "logo": {
+            "@type": "ImageObject",
+            "url": "data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iI0VGNDQ0NCIvPjwvc3ZnPg=="
+          }
+        },
+        "keywords": "learn Japanese, Japanese course, Hiragana practice, Katakana practice, Kanji basics, AI Japanese tutor, Gemini API, PWA Japanese app, Japanese lessons"
+      }
+    ]
+  }
+  </script>
 <link rel="stylesheet" href="/index.css">
 </head>
 <body class="font-sans text-gray-200"> 
   <div class="background-gradient"></div> 
   <div id="root"></div>
-<script type="module" src="/index.tsx"></script>
+  <script type="module" src="/index.tsx"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(registration => {
+            console.log('ServiceWorker registration successful with scope: ', registration.scope);
+          })
+          .catch(error => {
+            console.log('ServiceWorker registration failed: ', error);
+          });
+      });
+    }
+  </script>
 </body>
 </html>

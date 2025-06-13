@@ -1,7 +1,17 @@
 
-import { LessonDay, ContentBlockType, LessonType, KanaCharacter } from '../types';
+
+import { LessonDay, ContentBlockType, LessonType, KanaCharacter, VocabularyListContentBlock, GrammarExplanationContentBlock, KanaInfoContentBlock, FillInTheBlankExerciseBlock, PronunciationPracticeContentBlock, TextContentBlock, AiTutorStreamContentBlock, InterestingFactContentBlock, VocabularyItem } from '../types';
 
 const GITHUB_RAW_BASE_URL = 'https://raw.githubusercontent.com/predragcvetkovski/kanji.gif/master/';
+
+// Helper function to ensure character data is found
+const getCharOrThrow = (charSet: KanaCharacter[], charSymbol: string, lessonContext: string): KanaCharacter => {
+  const foundChar = charSet.find(c => c.char === charSymbol);
+  if (!foundChar) {
+    throw new Error(`Data integrity error: Character '${charSymbol}' not found in its set for ${lessonContext}.`);
+  }
+  return foundChar;
+};
 
 const hiraganaVowels: KanaCharacter[] = [
   { char: 'あ', romaji: 'a', exampleWord: 'あさ', exampleRomaji: 'asa', exampleMeaning: 'morning', strokeCount: 3, strokeOrderDiagramUrl: `${GITHUB_RAW_BASE_URL}hiragana/gif/150x150/あ.gif` },
@@ -12,11 +22,11 @@ const hiraganaVowels: KanaCharacter[] = [
 ];
 
 const hiraganaKLine: KanaCharacter[] = [
-  { char: 'か', romaji: 'ka', strokeCount: 3, strokeOrderDiagramUrl: `${GITHUB_RAW_BASE_URL}hiragana/gif/150x150/か.gif` },
-  { char: 'き', romaji: 'ki', strokeCount: 4, strokeOrderDiagramUrl: `${GITHUB_RAW_BASE_URL}hiragana/gif/150x150/き.gif` },
-  { char: 'く', romaji: 'ku', strokeCount: 1, strokeOrderDiagramUrl: `${GITHUB_RAW_BASE_URL}hiragana/gif/150x150/く.gif` },
-  { char: 'け', romaji: 'ke', strokeCount: 3, strokeOrderDiagramUrl: `${GITHUB_RAW_BASE_URL}hiragana/gif/150x150/け.gif` },
-  { char: 'こ', romaji: 'ko', strokeCount: 2, strokeOrderDiagramUrl: `${GITHUB_RAW_BASE_URL}hiragana/gif/150x150/こ.gif` },
+  { char: 'か', romaji: 'ka', strokeCount: 3, strokeOrderDiagramUrl: `${GITHUB_RAW_BASE_URL}hiragana/gif/150x150/か.gif`, exampleWord: 'かさ', exampleRomaji: 'kasa', exampleMeaning: 'umbrella' },
+  { char: 'き', romaji: 'ki', strokeCount: 4, strokeOrderDiagramUrl: `${GITHUB_RAW_BASE_URL}hiragana/gif/150x150/き.gif`, exampleWord: 'きく', exampleRomaji: 'kiku', exampleMeaning: 'to listen' },
+  { char: 'く', romaji: 'ku', strokeCount: 1, strokeOrderDiagramUrl: `${GITHUB_RAW_BASE_URL}hiragana/gif/150x150/く.gif`, exampleWord: 'くつ', exampleRomaji: 'kutsu', exampleMeaning: 'shoes' },
+  { char: 'け', romaji: 'ke', strokeCount: 3, strokeOrderDiagramUrl: `${GITHUB_RAW_BASE_URL}hiragana/gif/150x150/け.gif`, exampleWord: 'けむし', exampleRomaji: 'kemushi', exampleMeaning: 'caterpillar' },
+  { char: 'こ', romaji: 'ko', strokeCount: 2, strokeOrderDiagramUrl: `${GITHUB_RAW_BASE_URL}hiragana/gif/150x150/こ.gif`, exampleWord: 'こえ', exampleRomaji: 'koe', exampleMeaning: 'voice' },
 ];
 
 const hiraganaSLine: KanaCharacter[] = [
@@ -111,7 +121,7 @@ const hiraganaHandakutenP: KanaCharacter[] = [
   { char: 'ぽ', romaji: 'po', strokeCount: 6, strokeOrderDiagramUrl: `${GITHUB_RAW_BASE_URL}hiragana/static/150x150/ぽ.png` },
 ];
 
-const hiraganaYoon: KanaCharacter[] = [ // Yoon characters typically don't have separate stroke order animations; they combine base characters.
+const hiraganaYoon: KanaCharacter[] = [ 
   { char: 'きゃ', romaji: 'kya' }, { char: 'きゅ', romaji: 'kyu' }, { char: 'きょ', romaji: 'kyo' },
   { char: 'しゃ', romaji: 'sha' }, { char: 'しゅ', romaji: 'shu' }, { char: 'しょ', romaji: 'sho' },
   { char: 'ちゃ', romaji: 'cha' }, { char: 'ちゅ', romaji: 'chu' }, { char: 'ちょ', romaji: 'cho' },
@@ -302,12 +312,35 @@ const kanjiSet7_ActionsMisc: KanaCharacter[] = [
   { char: '好', romaji: 'kou, kono(mu), su(ku)', exampleWord: '好き (suki)', exampleRomaji: 'suki', exampleMeaning: 'like, fond of', strokeCount: 6, strokeOrderDiagramUrl: `${GITHUB_RAW_BASE_URL}kanji/gif/150x150/好.gif` },
 ];
 
-const kanji_Toki_Time: KanaCharacter[] = [ // Added for Day 18
+const kanji_Toki_Time: KanaCharacter[] = [ 
   { char: '時', romaji: 'ji, toki', exampleWord: '時間 (jikan)', exampleMeaning: 'time, duration', strokeCount: 10, strokeOrderDiagramUrl: `${GITHUB_RAW_BASE_URL}kanji/gif/150x150/時.gif` }
 ];
 
+// Helper function to generate AI Tutor system prompt
+const generateAiTutorPrompt = (day: number, lessonTitle: string, lessonOverview: string): string => {
+  return `You are a friendly and patient Japanese language tutor named 'Sakura Sensei'.
+The user is currently on Day ${day} of their learning plan, which is titled "${lessonTitle}".
+Today's lesson overview: "${lessonOverview}".
+Your goal is to help the user practice the concepts from today's lesson. Engage the user in a conversation related to these topics.
+You can:
+- Ask questions related to the lesson.
+- Suggest sentences for them to try using new vocabulary or grammar.
+- Role-play simple scenarios relevant to the day's content.
+- If the user uses English, gently guide them to try in Japanese if appropriate for the topic.
+When responding:
+- Primarily use simple Japanese.
+- ALWAYS provide Romaji in parentheses after Japanese phrases or sentences, e.g., こんにちは (Konnichiwa).
+- ALWAYS provide a concise English translation in square brackets after the Romaji, e.g., [Hello].
+Example response format: 日本語の文 (Nihongo no bun) [Japanese sentence].
+If the user sends an audio message, your response should:
+1. First, provide a transcription of what you understood them to say, like: "You said: [transcribed audio in Japanese (Romaji)]".
+2. Then, provide feedback on their pronunciation if it's relevant or if they struggled.
+3. Finally, continue the conversation based on their utterance and the lesson topic.
+Keep your responses relatively short, clear, and encouraging. Use emojis occasionally to make the interaction more engaging. Let's make learning fun! がんばりましょう！ (Ganbarimashou!) [Let's do our best!]`;
+};
 
-export const thirtyDayPlan: LessonDay[] = [
+
+export const thirtyDayPlan_Unprocessed: LessonDay[] = [
   // Day 1: Introduction to Hiragana (Vowels)
   {
     day: 1,
@@ -331,11 +364,18 @@ export const thirtyDayPlan: LessonDay[] = [
         id: 'd1-writing-practice-a',
         type: ContentBlockType.WRITING_PRACTICE,
         title: 'Writing Practice: あ (a)',
-        characterToPractice: hiraganaVowels.find(c => c.char === 'あ')!,
+        characterToPractice: getCharOrThrow(hiraganaVowels, 'あ', "Day 1 'あ' writing practice"),
         instructions: "Let's practice writing 'あ'. Follow the stroke order diagram. Try to get the proportions right. Click 'Clear' to try again.",
-        guidanceImageUrl: hiraganaVowels.find(c => c.char === 'あ')?.strokeOrderDiagramUrl
+        guidanceImageUrl: getCharOrThrow(hiraganaVowels, 'あ', "Day 1 'あ' writing practice").strokeOrderDiagramUrl
       },
-      { id: 'd1-gemini-practice', type: ContentBlockType.GEMINI_PRACTICE, title: 'AI Pronunciation Check (Greetings)', instructionText: 'Type one of the greetings you learned (e.g., "Konnichiwa"). Gemini will try to evaluate your pronunciation (conceptually for this text-based app, it will confirm understanding).', geminiPrompt: 'The user is practicing Japanese greetings. The user said: ', requiresUserInput: true, placeholder: 'こんにちは' },
+      // InterestingFactContentBlock for Day 1
+      {
+        id: 'd1-fact',
+        type: ContentBlockType.INTERESTING_FACT,
+        storyTitle: "The Magic of 'Hai!'",
+        storyMarkdown: "Did you know that in Japan, saying **はい (Hai)** is more than just agreement? Often, it's a polite way to show you're actively listening, like saying 'uh-huh' or 'I hear you'. So, next time you hear it in a conversation, remember this important cultural nuance! \n\nOf course, a friendly **こんにちは (Konnichiwa)** during the day or **おはようございます (Ohayou gozaimasu)** when you start your day will always be appreciated. And a heartfelt **ありがとう (Arigatou)** goes a long way whenever someone helps you or offers something nice.",
+        relatedVocabularyIds: ['d1-vocab-4', 'd1-vocab-0', 'd1-vocab-1', 'd1-vocab-3']
+      },
     ],
   },
   // Day 2: Hiragana (K-line & S-line)
@@ -361,19 +401,25 @@ export const thirtyDayPlan: LessonDay[] = [
         id: 'd2-writing-practice-ka',
         type: ContentBlockType.WRITING_PRACTICE,
         title: 'Writing Practice: か (ka)',
-        characterToPractice: hiraganaKLine.find(c => c.char === 'か')!,
+        characterToPractice: getCharOrThrow(hiraganaKLine, 'か', "Day 2 'か' writing practice"),
         instructions: "Practice writing 'か'. Remember the stroke order.",
-        guidanceImageUrl: hiraganaKLine.find(c => c.char === 'か')?.strokeOrderDiagramUrl
+        guidanceImageUrl: getCharOrThrow(hiraganaKLine, 'か', "Day 2 'か' writing practice").strokeOrderDiagramUrl
       },
       {
         id: 'd2-writing-practice-sa',
         type: ContentBlockType.WRITING_PRACTICE,
         title: 'Writing Practice: さ (sa)',
-        characterToPractice: hiraganaSLine.find(c => c.char === 'さ')!,
+        characterToPractice: getCharOrThrow(hiraganaSLine, 'さ', "Day 2 'さ' writing practice"),
         instructions: "Practice writing 'さ'. It has three strokes.",
-        guidanceImageUrl: hiraganaSLine.find(c => c.char === 'さ')?.strokeOrderDiagramUrl
+        guidanceImageUrl: getCharOrThrow(hiraganaSLine, 'さ', "Day 2 'さ' writing practice").strokeOrderDiagramUrl
       },
-      { id: 'd2-gemini-practice', type: ContentBlockType.GEMINI_PRACTICE, title: 'AI Word Formation', instructionText: 'Gemini will give you a romaji word using only the Hiragana learned so far (a, i, u, e, o, ka, ki, ku, ke, ko, sa, shi, su, se, so). Try to write it in Hiragana.', geminiPrompt: 'Provide a simple Japanese word in romaji using only the hiragana characters a,i,u,e,o,ka,ki,ku,ke,ko,sa,shi,su,se,so. For example: "kasa". Then, ask the user to write it in Hiragana.', isJsonOutput: false },
+      {
+        id: 'd2-fact',
+        type: ContentBlockType.INTERESTING_FACT,
+        storyTitle: "The Case of the Missing 'Si'",
+        storyMarkdown: "When learning the 'S-line' (さしすせそ), you might notice that **し (shi)** sounds like 'shee' not 'see'. Why? Japanese phonetics have evolved over centuries! Long ago, there might have been a 'si' sound, but it merged into 'shi'. This is common in languages; sounds change! So, when you order **すし (sushi)**, or ask for an **あかい (akai)** [red] **かさ (kasa)** [umbrella] because it's raining, you're using these unique sounds.",
+        relatedVocabularyIds: ['d2-vocab-1', 'd2-vocab-3', 'd2-vocab-0']
+      },
     ],
   },
   // Day 3: Basic Grammar (A は B です) & Culture
@@ -414,7 +460,13 @@ export const thirtyDayPlan: LessonDay[] = [
         explanation: "The particle は (wa) is used here to mark 'これ' (kore - this) as the topic of the sentence."
       },
       { id: 'd3-culture', type: ContentBlockType.CULTURAL_NOTE, title: 'A Quick Note on Bowing', note: 'Bowing (お辞儀 - ojigi) is a very important part of Japanese culture. The depth and duration of the bow depend on the situation and the relationship between the people. It\'s used for greetings, apologies, thanks, and showing respect.' },
-      { id: 'd3-gemini-practice', type: ContentBlockType.GEMINI_PRACTICE, title: 'AI Sentence Building', instructionText: 'Using "A は B です", try to make a sentence like "I am a teacher" or "This is a book" using vocabulary from today or previous days. Type your sentence in Romaji or Hiragana.', geminiPrompt: 'The user is practicing the "A wa B desu" sentence structure. The user wrote: ', requiresUserInput: true, placeholder: 'Watashi wa sensei desu.' },
+      {
+        id: 'd3-fact',
+        type: ContentBlockType.INTERESTING_FACT,
+        storyTitle: "The Mysterious 'Wa'",
+        storyMarkdown: "The particle **は (wa)**, written with the Hiragana for 'ha', is a cornerstone of Japanese. It marks the topic of your sentence. Imagine you pick up a **ほん (hon)** [book] and want to say 'This is a book'. You'd use **これ (kore)** [this] and say: **これはほんです (Kore wa hon desu.)**. You, as **わたし (watashi)** [I], might be a **がくせい (gakusei)** [student], so you'd say: **わたしはがくせいです (Watashi wa gakusei desu.)**. Mastering 'は (wa)' is key to sounding natural!",
+        relatedVocabularyIds: ['d3-vocab-7', 'd3-vocab-2', 'd3-vocab-0', 'd3-vocab-5']
+      },
     ],
   },
   // Day 4: Hiragana (T-line & N-line) & Particles は, も
@@ -442,17 +494,17 @@ export const thirtyDayPlan: LessonDay[] = [
         id: 'd4-writing-practice-ta',
         type: ContentBlockType.WRITING_PRACTICE,
         title: 'Writing Practice: た (ta)',
-        characterToPractice: hiraganaTLine.find(c => c.char === 'た')!,
+        characterToPractice: getCharOrThrow(hiraganaTLine, 'た', "Day 4 'た' writing practice"),
         instructions: "Practice writing 'た'. It has 4 strokes.",
-        guidanceImageUrl: hiraganaTLine.find(c => c.char === 'た')?.strokeOrderDiagramUrl
+        guidanceImageUrl: getCharOrThrow(hiraganaTLine, 'た', "Day 4 'た' writing practice").strokeOrderDiagramUrl
       },
       {
         id: 'd4-writing-practice-na',
         type: ContentBlockType.WRITING_PRACTICE,
         title: 'Writing Practice: な (na)',
-        characterToPractice: hiraganaNLine.find(c => c.char === 'な')!,
+        characterToPractice: getCharOrThrow(hiraganaNLine, 'な', "Day 4 'な' writing practice"),
         instructions: "Practice writing 'な'. It also has 4 strokes.",
-        guidanceImageUrl: hiraganaNLine.find(c => c.char === 'な')?.strokeOrderDiagramUrl
+        guidanceImageUrl: getCharOrThrow(hiraganaNLine, 'な', "Day 4 'な' writing practice").strokeOrderDiagramUrl
       },
       {
         id: 'd4-grammar-mo', type: ContentBlockType.GRAMMAR_EXPLANATION, title: 'Particles: は (wa) Review & も (mo - also)',
@@ -467,11 +519,11 @@ export const thirtyDayPlan: LessonDay[] = [
         id: 'd4-fill-blank-mo',
         type: ContentBlockType.FILL_IN_THE_BLANK_EXERCISE,
         title: 'Particle Practice (も)',
-        sentenceParts: ["たなかさんはせんせいです。やまださん", "せんせいですか。"], // Tanaka-san wa sensei desu. Yamada-san MO sensei desu ka.
+        sentenceParts: ["たなかさんはせんせいです。やまださん", "せんせいですか。"], 
         correctAnswer: "も",
         explanation: "The particle も (mo) is used here to ask if Yamada-san is *also* a teacher, just like Tanaka-san."
       },
-      { id: 'd4-gemini-practice', type: ContentBlockType.GEMINI_PRACTICE, title: 'AI Sentence Translation (も)', instructionText: 'Translate this English sentence to Japanese using も: "I am a student. He is also a student." (Hint: He = かれ - kare)', geminiPrompt: 'The user wants to translate "I am a student. He is also a student." into Japanese using the particle も for "also". Evaluate their attempt:', requiresUserInput: true, placeholder: 'Watashi wa gakusei desu. Kare mo gakusei desu.' },
+      // ADD DAY 4 FACT HERE IF IMPLEMENTING FOR ALL DAYS
     ],
   },
   // Day 5: Hiragana (H-line & M-line) & Asking Questions (か)
@@ -499,17 +551,17 @@ export const thirtyDayPlan: LessonDay[] = [
         id: 'd5-writing-practice-ha',
         type: ContentBlockType.WRITING_PRACTICE,
         title: 'Writing Practice: は (ha)',
-        characterToPractice: hiraganaHLine.find(c => c.char === 'は')!,
+        characterToPractice: getCharOrThrow(hiraganaHLine, 'は', "Day 5 'は' writing practice"),
         instructions: "Practice writing 'は'.",
-        guidanceImageUrl: hiraganaHLine.find(c => c.char === 'は')?.strokeOrderDiagramUrl
+        guidanceImageUrl: getCharOrThrow(hiraganaHLine, 'は', "Day 5 'は' writing practice").strokeOrderDiagramUrl
       },
       {
         id: 'd5-writing-practice-ma',
         type: ContentBlockType.WRITING_PRACTICE,
         title: 'Writing Practice: ま (ma)',
-        characterToPractice: hiraganaMLine.find(c => c.char === 'ま')!,
+        characterToPractice: getCharOrThrow(hiraganaMLine, 'ま', "Day 5 'ま' writing practice"),
         instructions: "Practice writing 'ま'.",
-        guidanceImageUrl: hiraganaMLine.find(c => c.char === 'ま')?.strokeOrderDiagramUrl
+        guidanceImageUrl: getCharOrThrow(hiraganaMLine, 'ま', "Day 5 'ま' writing practice").strokeOrderDiagramUrl
       },
       {
         id: 'd5-grammar-ka', type: ContentBlockType.GRAMMAR_EXPLANATION, title: 'Asking Questions with か (ka)',
@@ -520,10 +572,10 @@ export const thirtyDayPlan: LessonDay[] = [
           { id: 'd5-gram-ex-2', japanese: 'いいえ、せんせいではありません。', romaji: 'Iie, sensei dewa arimasen.', meaning: 'No, I am not a teacher. (ではありません - dewa arimasen is the polite negative of です)' }
         ]
       },
-      { id: 'd5-gemini-practice', type: ContentBlockType.GEMINI_PRACTICE, title: 'AI Question & Answer', instructionText: 'Gemini will ask you a simple yes/no question in Japanese using "A は B ですか。" Try to answer with はい (hai) or いいえ (iie) and the appropriate statement.', geminiPrompt: 'Ask the user a simple yes/no question in Japanese that they can answer with the grammar learned so far (A wa B desu ka?). For example: "Anata wa sensei desu ka?" or "Kore wa neko desu ka?". Then, evaluate their response (e.g. "Hai, neko desu." or "Iie, inu desu.")', isJsonOutput: false },
+      // ADD DAY 5 FACT HERE
     ],
   },
-  // Day 6: Hiragana (Y, R lines) & Particle の (Possession)
+    // Day 6: Hiragana (Y, R lines) & Particle の (Possession)
   {
     day: 6,
     title: 'Hiragana (や行, ら行) & Particle の (Possession)',
@@ -556,19 +608,19 @@ export const thirtyDayPlan: LessonDay[] = [
         id: 'd6-writing-practice-ya',
         type: ContentBlockType.WRITING_PRACTICE,
         title: 'Writing Practice: や (ya)',
-        characterToPractice: hiraganaYLine.find(c => c.char === 'や')!,
+        characterToPractice: getCharOrThrow(hiraganaYLine, 'や', "Day 6 'や' writing practice"),
         instructions: "Practice writing 'や'. Pay attention to its unique shape.",
-        guidanceImageUrl: hiraganaYLine.find(c => c.char === 'や')?.strokeOrderDiagramUrl
+        guidanceImageUrl: getCharOrThrow(hiraganaYLine, 'や', "Day 6 'や' writing practice").strokeOrderDiagramUrl
       },
       {
         id: 'd6-writing-practice-ri',
         type: ContentBlockType.WRITING_PRACTICE,
         title: 'Writing Practice: り (ri)',
-        characterToPractice: hiraganaRLine.find(c => c.char === 'り')!,
+        characterToPractice: getCharOrThrow(hiraganaRLine, 'り', "Day 6 'り' writing practice"),
         instructions: "Practice writing 'り'. It has two strokes.",
-        guidanceImageUrl: hiraganaRLine.find(c => c.char === 'り')?.strokeOrderDiagramUrl
+        guidanceImageUrl: getCharOrThrow(hiraganaRLine, 'り', "Day 6 'り' writing practice").strokeOrderDiagramUrl
       },
-      { id: 'd6-gemini-practice', type: ContentBlockType.GEMINI_PRACTICE, title: 'AI Possession Practice', instructionText: 'How would you say "This is my cat" in Japanese? (cat = ねこ - neko)', geminiPrompt: 'The user is practicing the possessive particle の (no). They are trying to say "This is my cat." Evaluate their Japanese sentence:', requiresUserInput: true, placeholder: 'Kore wa watashi no neko desu.' },
+      // ADD DAY 6 FACT HERE
     ],
   },
   // Day 7: Hiragana (W-line, ん) & Review
@@ -597,20 +649,20 @@ export const thirtyDayPlan: LessonDay[] = [
         id: 'd7-writing-practice-wa',
         type: ContentBlockType.WRITING_PRACTICE,
         title: 'Writing Practice: わ (wa)',
-        characterToPractice: hiraganaWLineN.find(c => c.char === 'わ')!,
+        characterToPractice: getCharOrThrow(hiraganaWLineN, 'わ', "Day 7 'わ' writing practice"),
         instructions: "Practice writing 'わ'.",
-        guidanceImageUrl: hiraganaWLineN.find(c => c.char === 'わ')?.strokeOrderDiagramUrl
+        guidanceImageUrl: getCharOrThrow(hiraganaWLineN, 'わ', "Day 7 'わ' writing practice").strokeOrderDiagramUrl
       },
       {
         id: 'd7-writing-practice-n',
         type: ContentBlockType.WRITING_PRACTICE,
         title: 'Writing Practice: ん (n)',
-        characterToPractice: hiraganaWLineN.find(c => c.char === 'ん')!,
+        characterToPractice: getCharOrThrow(hiraganaWLineN, 'ん', "Day 7 'ん' writing practice"),
         instructions: "Practice writing 'ん'. It's a single, flowing stroke.",
-        guidanceImageUrl: hiraganaWLineN.find(c => c.char === 'ん')?.strokeOrderDiagramUrl
+        guidanceImageUrl: getCharOrThrow(hiraganaWLineN, 'ん', "Day 7 'ん' writing practice").strokeOrderDiagramUrl
       },
       { id: 'd7-review', type: ContentBlockType.TEXT, title: 'Hiragana Review Time!', markdownContent: 'Take some time to review all the Hiragana characters learned from Day 1 to Day 7. Use the Kana tables in previous lessons. Try writing them all out!' },
-      { id: 'd7-gemini-practice', type: ContentBlockType.GEMINI_PRACTICE, title: 'AI Hiragana Quiz', instructionText: 'Gemini will give you a Romaji sound (e.g., "ke", "shi", "no"). Type the corresponding Hiragana character.', geminiPrompt: 'Provide a single, simple Hiragana sound in Romaji (e.g., "to", "mi", "wa") from any of the basic Hiragana characters learned so far. Ask the user to write the Hiragana character for it.', isJsonOutput: false },
+      // ADD DAY 7 FACT HERE
     ],
   },
   // Day 8: Voiced Sounds (Dakuten) & P-sounds (Handakuten)
@@ -642,7 +694,7 @@ export const thirtyDayPlan: LessonDay[] = [
           { id: 'd8-vocab-6', japanese: 'ぱん', romaji: 'pan', meaning: 'bread' },
         ]
       },
-      { id: 'd8-gemini-practice', type: ContentBlockType.GEMINI_PRACTICE, title: 'AI Sound Change Quiz', instructionText: 'Gemini will give you a basic Hiragana (e.g., か). Type its voiced sound with dakuten (e.g., が) or handakuten if applicable.', geminiPrompt: 'Provide a basic Hiragana character that can take a dakuten (e.g., "き", "つ", "は") or handakuten ("ひ"). Ask the user to type the modified character with the dakuten or handakuten and its romaji.', isJsonOutput: false },
+      // ADD DAY 8 FACT HERE
     ],
   },
   // Day 9: Combined Sounds (Yōon)
@@ -669,7 +721,7 @@ export const thirtyDayPlan: LessonDay[] = [
           { id: 'd9-vocab-6', japanese: 'ちゃいろ', romaji: 'chairo', meaning: 'brown (color)' },
         ]
       },
-      { id: 'd9-gemini-practice', type: ContentBlockType.GEMINI_PRACTICE, title: 'AI Yōon Reading', instructionText: 'Gemini will provide a word containing a Yōon sound written in Hiragana. Try to read it aloud and then type its Romaji.', geminiPrompt: 'Provide a simple Japanese word written in Hiragana that contains a yōon sound (e.g., きょう, しゅくだい, びょうき). Ask the user to type the Romaji for it.', isJsonOutput: false },
+      // ADD DAY 9 FACT HERE
     ],
   },
   // Day 10: Introduction to Katakana (Vowels & K, S lines)
@@ -696,11 +748,11 @@ export const thirtyDayPlan: LessonDay[] = [
         id: 'd10-writing-practice-A',
         type: ContentBlockType.WRITING_PRACTICE,
         title: 'Writing Practice: ア (A)',
-        characterToPractice: katakanaVowels.find(c => c.char === 'ア')!,
+        characterToPractice: getCharOrThrow(katakanaVowels, 'ア', "Day 10 'ア' writing practice"),
         instructions: "Practice writing Katakana 'ア'. It's more angular than Hiragana 'あ'.",
-        guidanceImageUrl: katakanaVowels.find(c => c.char === 'ア')?.strokeOrderDiagramUrl
+        guidanceImageUrl: getCharOrThrow(katakanaVowels, 'ア', "Day 10 'ア' writing practice").strokeOrderDiagramUrl
       },
-      { id: 'd10-gemini-practice', type: ContentBlockType.GEMINI_PRACTICE, title: 'AI Katakana Match', instructionText: 'Gemini will show a Hiragana character. Type its Katakana equivalent if it\'s among the ones learned today (vowels, K-line, S-line).', geminiPrompt: 'Provide a Hiragana character from the a, i, u, e, o, ka, ki, ku, ke, ko, sa, shi, su, se, so set. Ask the user to type the Katakana equivalent.', isJsonOutput: false },
+      // ADD DAY 10 FACT HERE
     ],
   },
   // Day 11: Katakana (T, N lines) & Long Vowel Sound
@@ -728,18 +780,18 @@ export const thirtyDayPlan: LessonDay[] = [
           { id: 'd11-vocab-0', japanese: 'テニス', romaji: 'tenisu', meaning: 'tennis' },
           { id: 'd11-vocab-1', japanese: 'ネクタイ', romaji: 'nekutai', meaning: 'necktie' },
           { id: 'd11-vocab-2', japanese: 'チーズ', romaji: 'chiizu', meaning: 'cheese' },
-          { id: 'd11-vocab-3', japanese: 'パーティー', romaji: 'paathii', meaning: 'party' }, // Example for later (P sound)
+          { id: 'd11-vocab-3', japanese: 'パーティー', romaji: 'paathii', meaning: 'party' },
         ]
       },
       {
         id: 'd11-writing-practice-TA',
         type: ContentBlockType.WRITING_PRACTICE,
         title: 'Writing Practice: タ (TA)',
-        characterToPractice: katakanaTLine.find(c => c.char === 'タ')!,
+        characterToPractice: getCharOrThrow(katakanaTLine, 'タ', "Day 11 'タ' writing practice"),
         instructions: "Practice writing Katakana 'タ'.",
-        guidanceImageUrl: katakanaTLine.find(c => c.char === 'タ')?.strokeOrderDiagramUrl
+        guidanceImageUrl: getCharOrThrow(katakanaTLine, 'タ', "Day 11 'タ' writing practice").strokeOrderDiagramUrl
       },
-      { id: 'd11-gemini-practice', type: ContentBlockType.GEMINI_PRACTICE, title: 'AI Long Vowel Quiz', instructionText: 'Gemini will give you a short Katakana word (e.g., "keki"). Rewrite it with the appropriate long vowel mark (e.g., "keeki" -> ケーキ).', geminiPrompt: 'Provide a simple Katakana loanword that is typically written with a long vowel mark, but give it in its "short" Romaji form (e.g., "kohi" for coffee, "supotsu" for sports). Ask the user to write the correct Katakana with the long vowel mark (ー).', isJsonOutput: false },
+      // ADD DAY 11 FACT HERE
     ],
   },
   // Day 12: Katakana (H, M lines) & Small Tsu (ッ)
@@ -769,7 +821,7 @@ export const thirtyDayPlan: LessonDay[] = [
           { id: 'd12-vocab-3', japanese: 'サッカー', romaji: 'sakkaa', meaning: 'soccer/football' },
         ]
       },
-      { id: 'd12-gemini-practice', type: ContentBlockType.GEMINI_PRACTICE, title: 'AI Sokuon Challenge', instructionText: 'Gemini will give you a Romaji word with a double consonant (e.g., "hotto" for hot). Write it in Katakana using the small ッ.', geminiPrompt: 'Provide a Romaji representation of a loanword that uses a double consonant (sokuon), e.g., "petto" (pet), "kippu" (ticket). Ask the user to write it in Katakana using the small ッ.', isJsonOutput: false },
+      // ADD DAY 12 FACT HERE
     ],
   },
   // Day 13: Katakana (Y, R, W lines, ン)
@@ -793,10 +845,10 @@ export const thirtyDayPlan: LessonDay[] = [
           { id: 'd13-vocab-1', japanese: 'ヨーロッパ', romaji: 'yooroppa', meaning: 'Europe' },
           { id: 'd13-vocab-2', japanese: 'ワイン', romaji: 'wain', meaning: 'wine' },
           { id: 'd13-vocab-3', japanese: 'ラーメン', romaji: 'raamen', meaning: 'ramen' },
-          { id: 'd13-vocab-4', japanese: 'パン', romaji: 'pan', meaning: 'bread' }, // Already seen but uses ン
+          { id: 'd13-vocab-4', japanese: 'パン', romaji: 'pan', meaning: 'bread' }, 
         ]
       },
-      { id: 'd13-gemini-practice', type: ContentBlockType.GEMINI_PRACTICE, title: 'AI Katakana Word Recognition', instructionText: 'Gemini will show you a common loanword in Katakana using characters learned so far. Type its English meaning.', geminiPrompt: 'Provide a common loanword written in Katakana using only the basic Katakana characters learned up to Day 13 (e.g., カメラ, ホテル, スポーツ, ワイン). Ask the user to type the English meaning.', isJsonOutput: false },
+      // ADD DAY 13 FACT HERE
     ],
   },
   // Day 14: Katakana Dakuten, Handakuten & Yōon
@@ -827,7 +879,7 @@ export const thirtyDayPlan: LessonDay[] = [
           { id: 'd14-vocab-5', japanese: 'ビデオ', romaji: 'bideo', meaning: 'video' },
         ]
       },
-      { id: 'd14-gemini-practice', type: ContentBlockType.GEMINI_PRACTICE, title: 'AI Katakana Loanword Challenge', instructionText: 'Gemini will give you an English word. Try to write it in Katakana. This is tricky, focus on phonetic approximation!', geminiPrompt: 'Provide a simple English loanword that can be written in Katakana using the sounds learned (including dakuten, yōon, long vowels, sokuon), e.g., "coffee", "juice", "check", "message". Ask the user to write it in Katakana.', isJsonOutput: false },
+      // ADD DAY 14 FACT HERE
     ],
   },
   // Day 15: Review Hiragana & Katakana
@@ -840,11 +892,11 @@ export const thirtyDayPlan: LessonDay[] = [
       { id: 'd15-intro', type: ContentBlockType.TEXT, title: 'Mastering the Kana!', markdownContent: 'You\'ve learned all the basic Hiragana and Katakana! Today is for comprehensive review. This is a huge milestone!' },
       { id: 'd15-hiragana-full-review', type: ContentBlockType.TEXT, title: 'Hiragana Review', markdownContent: 'Go back through Days 1-9. Practice reading and writing all Hiragana characters, including vowels, k,s,t,n,h,m,y,r,w lines, ん, dakuten, handakuten, and yōon sounds.' },
       { id: 'd15-katakana-full-review', type: ContentBlockType.TEXT, title: 'Katakana Review', markdownContent: 'Go back through Days 10-14. Practice reading and writing all Katakana characters, including vowels, k,s,t,n,h,m,y,r,w lines, ン, long vowel mark (ー), small tsu (ッ), dakuten, handakuten, and yōon sounds.' },
-      { id: 'd15-gemini-practice', type: ContentBlockType.GEMINI_PRACTICE, title: 'AI Mixed Kana Quiz', instructionText: 'Gemini will provide a word that might be in Hiragana, Katakana, or a mix. Identify the script(s) and type the Romaji.', geminiPrompt: 'Provide a Japanese word written in either Hiragana (e.g., おはよう), Katakana (e.g., アメリカ), or a common mix (e.g., チョコレートケーキ if you want to be tricky, or simply a name like 田中さん if that is too complex for this stage). Ask the user to identify the script(s) used and provide the Romaji.', isJsonOutput: false },
       { id: 'd15-culture-note', type: ContentBlockType.CULTURAL_NOTE, title: 'Karaoke (カラオケ)', note: 'Karaoke is a hugely popular pastime in Japan, originating there! Many song lyrics will use a mix of Hiragana, Katakana, and Kanji. Being able to read Kana is your first step to singing along!' }
+      // ADD DAY 15 FACT HERE
     ],
   },
-  // Day 16: Demonstratives (これ, それ, あれ, この, その, あの)
+    // Day 16: Demonstratives (これ, それ, あれ, この, その, あの)
   {
     day: 16,
     title: 'Pointing Things Out: Demonstratives',
@@ -880,7 +932,7 @@ export const thirtyDayPlan: LessonDay[] = [
           { id: 'd16-vocab-4', japanese: 'だれ', romaji: 'dare', meaning: 'who' },
         ]
       },
-      { id: 'd16-gemini-practice', type: ContentBlockType.GEMINI_PRACTICE, title: 'AI Demonstrative Scenarios', instructionText: 'Gemini will describe a simple scenario (e.g., "A book is near you. Ask what it is."). Formulate the Japanese question or statement.', geminiPrompt: 'Describe a simple scenario involving an object and its location relative to a speaker and listener. For example: "You see a cat far away from both you and your friend. Point it out and say \'That (over there) is a cat\'." Ask the user to provide the Japanese sentence.', isJsonOutput: false },
+      // ADD DAY 16 FACT HERE
     ],
   },
   // Day 17: Basic Adjectives (い-adjectives & な-adjectives)
@@ -924,7 +976,7 @@ export const thirtyDayPlan: LessonDay[] = [
           { id: 'd17-vocab-10', japanese: 'まち', romaji: 'machi', meaning: 'town, city' },
         ]
       },
-      { id: 'd17-gemini-practice', type: ContentBlockType.GEMINI_PRACTICE, title: 'AI Adjective Challenge', instructionText: 'Describe "a big dog" in Japanese. Then describe "a kind teacher". Pay attention to い vs な adjectives.', geminiPrompt: 'The user wants to describe "a big dog" and "a kind teacher" in Japanese. Evaluate their use of adjectives (e.g., おおきいいぬ, しんせつなせんせい).', requiresUserInput: true, placeholder: 'Ookii inu. Shinsetsu na sensei.' },
+      // ADD DAY 17 FACT HERE
     ],
   },
   // Day 18: Telling Time
@@ -936,7 +988,7 @@ export const thirtyDayPlan: LessonDay[] = [
     contentBlocks: [
       { id: 'd18-intro', type: ContentBlockType.TEXT, title: 'Let\'s Learn to Tell Time!', markdownContent: 'Knowing how to tell time is essential for daily conversations and making plans.' },
       {
-        id: 'd18-kanji-ji', type: ContentBlockType.KANA_INFO, kanaSet: 'katakana', /* Using 'katakana' as placeholder for Kanji rendering */ title: 'Kanji for Time: 時 (ji)',
+        id: 'd18-kanji-ji', type: ContentBlockType.KANA_INFO, kanaSet: 'katakana', title: 'Kanji for Time: 時 (ji)',
         introduction: 'This Kanji means "time" or "hour". You\'ll see it often!',
         characters: kanji_Toki_Time
       },
@@ -982,7 +1034,7 @@ export const thirtyDayPlan: LessonDay[] = [
           { id: 'd18-ask-ex-2', japanese: 'ごご にじ はん です。', romaji: 'Gogo ni-ji han desu.', meaning: 'It is 2:30 P.M.' },
         ]
       },
-      { id: 'd18-gemini-practice', type: ContentBlockType.GEMINI_PRACTICE, title: 'AI Time Practice', instructionText: 'Gemini will give you a time in HH:MM format (e.g., "03:20 PM"). Write it out in Japanese (Romaji or Kana).', geminiPrompt: 'Provide a time in HH:MM AM/PM format (e.g., "07:45 AM", "11:15 PM", "01:30 PM"). Ask the user to write this time in Japanese.', isJsonOutput: false },
+      // ADD DAY 18 FACT HERE
     ],
   },
   // Day 19: Days of the Week & Months
@@ -994,17 +1046,17 @@ export const thirtyDayPlan: LessonDay[] = [
     contentBlocks: [
       { id: 'd19-intro', type: ContentBlockType.TEXT, title: 'Marking Your Calendar!', markdownContent: 'Let\'s learn how to talk about days and months. You\'ll see familiar Kanji here!' },
       {
-        id: 'd19-kanji-review', type: ContentBlockType.KANA_INFO, kanaSet: 'katakana', /* Using 'katakana' as placeholder for Kanji rendering */ title: 'Relevant Kanji Review',
+        id: 'd19-kanji-review', type: ContentBlockType.KANA_INFO, kanaSet: 'katakana', title: 'Relevant Kanji Review',
         introduction: 'Remember these Kanji? They are key to understanding days of the week and months!',
         characters: [
-          kanjiSet1_NumbersPeopleDay.find(k => k.char === '日')!,
-          kanjiSet2_ElementsTime.find(k => k.char === '月')!,
-          kanjiSet2_ElementsTime.find(k => k.char === '火')!,
-          kanjiSet2_ElementsTime.find(k => k.char === '水')!,
-          kanjiSet2_ElementsTime.find(k => k.char === '木')!,
-          kanjiSet2_ElementsTime.find(k => k.char === '金')!,
-          kanjiSet2_ElementsTime.find(k => k.char === '土')!,
-        ].filter(Boolean) as KanaCharacter[] // Filter out undefined if find fails
+          getCharOrThrow(kanjiSet1_NumbersPeopleDay, '日', "Day 19 Kanji Review '日'"),
+          getCharOrThrow(kanjiSet2_ElementsTime, '月', "Day 19 Kanji Review '月'"),
+          getCharOrThrow(kanjiSet2_ElementsTime, '火', "Day 19 Kanji Review '火'"),
+          getCharOrThrow(kanjiSet2_ElementsTime, '水', "Day 19 Kanji Review '水'"),
+          getCharOrThrow(kanjiSet2_ElementsTime, '木', "Day 19 Kanji Review '木'"),
+          getCharOrThrow(kanjiSet2_ElementsTime, '金', "Day 19 Kanji Review '金'"),
+          getCharOrThrow(kanjiSet2_ElementsTime, '土', "Day 19 Kanji Review '土'"),
+        ].filter(Boolean) as KanaCharacter[] 
       },
       {
         id: 'd19-vocab-daysweek', type: ContentBlockType.VOCABULARY_LIST, title: 'Days of the Week (ようび - yōbi)', items: [
@@ -1045,7 +1097,7 @@ export const thirtyDayPlan: LessonDay[] = [
           { id: 'd19-vocab-c6', japanese: 'らいしゅう (来週)', romaji: 'raishū', meaning: 'next week' },
         ]
       },
-      { id: 'd19-gemini-practice', type: ContentBlockType.GEMINI_PRACTICE, title: 'AI Date Question', instructionText: 'Ask Gemini in Japanese: "What day of the week is it today?"', geminiPrompt: 'The user is asking "What day of the week is it today?" in Japanese. A common way is 「今日は何曜日ですか。」(Kyou wa nan\'youbi desu ka.). Evaluate their question.', requiresUserInput: true, placeholder: 'Kyou wa nan\'youbi desu ka?' },
+      // ADD DAY 19 FACT HERE
     ],
   },
   // Day 20: Past Tense (Noun/Adj でした, Verb ました/ませんでした)
@@ -1065,7 +1117,6 @@ export const thirtyDayPlan: LessonDay[] = [
           { id: 'd20-past-ex-2', japanese: 'かれはがくせいではありませんでした。', romaji: 'Kare wa gakusei dewa arimasen deshita.', meaning: 'He was not a student. (かれ kare - he)' },
         ]
       },
-      // Note: い-adjective past tense is on Day 27 to break up dense grammar.
       {
         id: 'd20-grammar-past-verb', type: ContentBlockType.GRAMMAR_EXPLANATION, title: 'Past Tense: Verbs (ます-form)',
         explanation: 'For verbs in the polite ます (masu) form:\n- **Past Affirmative:** Change ます (masu) to ました (mashita).\n  Example: たべます (tabemasu - to eat) -> たべました (tabemashita - ate)\n- **Past Negative:** Change ません (masen) to ませんでした (masen deshita).\n  Example: たべません (tabemasen - do not eat) -> たべませんでした (tabemasen deshita - did not eat)',
@@ -1084,7 +1135,7 @@ export const thirtyDayPlan: LessonDay[] = [
           { id: 'd20-vocab-4', japanese: 'する / します', romaji: 'suru / shimasu', meaning: 'to do' },
         ]
       },
-      { id: 'd20-gemini-practice', type: ContentBlockType.GEMINI_PRACTICE, title: 'AI Past Tense Conversion', instructionText: 'Gemini will give you a sentence in the present polite tense. Convert it to the past polite tense.', geminiPrompt: 'Provide a simple Japanese sentence in the present polite tense using a noun, na-adjective, or a masu-form verb (e.g., "Kyou wa kayoubi desu.", "Kono heya wa kirei desu.", "Watashi wa eiga o mimasu."). Ask the user to convert it to the past polite tense.', isJsonOutput: false },
+      // ADD DAY 20 FACT HERE
     ],
   },
   // Day 21: Intro to Kanji & Basic Characters
@@ -1096,7 +1147,7 @@ export const thirtyDayPlan: LessonDay[] = [
     contentBlocks: [
       { id: 'd21-intro', type: ContentBlockType.TEXT, title: 'Welcome to Kanji (漢字)!', markdownContent: 'Kanji are Chinese characters adapted into Japanese. Each Kanji has one or more meanings and usually multiple readings (pronunciations).\n- **Onyomi (音読み):** Chinese-derived readings, often used in compound words.\n- **Kunyomi (訓読み):** Native Japanese readings, often used when the Kanji stands alone or with Hiragana endings (okurigana).\nLearning Kanji is a marathon, not a sprint. We will start with some of Fthe most basic ones.' },
       {
-        id: 'd21-kanji-set1', type: ContentBlockType.KANA_INFO, kanaSet: 'katakana', /* Repurposing for Kanji */ title: 'Kanji Set 1: Numbers, People, Day',
+        id: 'd21-kanji-set1', type: ContentBlockType.KANA_INFO, kanaSet: 'katakana', title: 'Kanji Set 1: Numbers, People, Day',
         introduction: 'These are some of the simplest and most frequent Kanji. Pay attention to stroke order, meanings, and common readings.',
         characters: kanjiSet1_NumbersPeopleDay
       },
@@ -1114,11 +1165,11 @@ export const thirtyDayPlan: LessonDay[] = [
         id: 'd21-writing-practice-hito',
         type: ContentBlockType.WRITING_PRACTICE,
         title: 'Writing Practice: 人 (person)',
-        characterToPractice: (kanjiSet1_NumbersPeopleDay as KanaCharacter[]).find(c => c.char === '人')!,
+        characterToPractice: getCharOrThrow(kanjiSet1_NumbersPeopleDay, '人', "Day 21 '人' writing practice"),
         instructions: "Practice writing the Kanji for 'person' (ひと - hito, ジン - jin, ニン - nin). It has two simple strokes.",
-        guidanceImageUrl: (kanjiSet1_NumbersPeopleDay as KanaCharacter[]).find(c => c.char === '人')?.strokeOrderDiagramUrl
+        guidanceImageUrl: getCharOrThrow(kanjiSet1_NumbersPeopleDay, '人', "Day 21 '人' writing practice").strokeOrderDiagramUrl
       },
-      { id: 'd21-gemini-practice', type: ContentBlockType.GEMINI_PRACTICE, title: 'AI Kanji Reading', instructionText: 'Gemini will show you a simple word containing one of today\'s Kanji (e.g., 一つ). Try to read it (Romaji or Kana).', geminiPrompt: 'Provide a simple Japanese word that uses one of the Kanji 一, 二, 三, 人, 日 (e.g., 一日 - tsuitachi/ichinichi, 日本 - nihon, 一人 - hitori). Ask the user to provide the Romaji reading.', isJsonOutput: false },
+      // ADD DAY 21 FACT HERE
     ],
   },
   // Day 22: More Basic Kanji (Elements & Time)
@@ -1130,7 +1181,7 @@ export const thirtyDayPlan: LessonDay[] = [
     contentBlocks: [
       { id: 'd22-intro', type: ContentBlockType.TEXT, title: 'Kanji for Elements and Time', markdownContent: 'Many of these Kanji are fundamental building blocks for vocabulary related to nature, time, and the calendar.' },
       {
-        id: 'd22-kanji-set2', type: ContentBlockType.KANA_INFO, kanaSet: 'katakana', /* Repurposing for Kanji */ title: 'Kanji Set 2: Elements & Year',
+        id: 'd22-kanji-set2', type: ContentBlockType.KANA_INFO, kanaSet: 'katakana', title: 'Kanji Set 2: Elements & Year',
         introduction: 'These Kanji are associated with celestial bodies, elements, and the concept of a year. You\'ll recognize them from the days of the week!',
         characters: kanjiSet2_ElementsTime
       },
@@ -1150,11 +1201,11 @@ export const thirtyDayPlan: LessonDay[] = [
         id: 'd22-writing-practice-tsuki',
         type: ContentBlockType.WRITING_PRACTICE,
         title: 'Writing Practice: 月 (moon/month)',
-        characterToPractice: kanjiSet2_ElementsTime.find(c => c.char === '月')!,
+        characterToPractice: getCharOrThrow(kanjiSet2_ElementsTime, '月', "Day 22 '月' writing practice"),
         instructions: "Practice writing the Kanji for 'moon' or 'month' (つき - tsuki, ゲツ - getsu, ガツ - gatsu).",
-        guidanceImageUrl: kanjiSet2_ElementsTime.find(c => c.char === '月')?.strokeOrderDiagramUrl
+        guidanceImageUrl: getCharOrThrow(kanjiSet2_ElementsTime, '月', "Day 22 '月' writing practice").strokeOrderDiagramUrl
       },
-      { id: 'd22-gemini-practice', type: ContentBlockType.GEMINI_PRACTICE, title: 'AI Kanji Identification', instructionText: 'Gemini will give you an English word like "Monday" or "water". Type the main Kanji associated with it from today\'s list.', geminiPrompt: 'Provide an English word whose corresponding Kanji was learned today (e.g., "Tuesday", "money", "year", "tree"). Ask the user to type the single Kanji character.', isJsonOutput: false, placeholder: '火 (for Tuesday)' },
+      // ADD DAY 22 FACT HERE
     ],
   },
   // Day 23: Particles で (Location of Action/Means) & と (And/With)
@@ -1198,7 +1249,7 @@ export const thirtyDayPlan: LessonDay[] = [
         id: 'd23-fill-blank-de',
         type: ContentBlockType.FILL_IN_THE_BLANK_EXERCISE,
         title: 'Particle Practice (で)',
-        sentenceParts: ["としょかん", "ほんをよみます。"], // Toshokan DE hon o yomimasu.
+        sentenceParts: ["としょかん", "ほんをよみます。"], 
         correctAnswer: "で",
         explanation: "The particle で (de) is used here to mark としょかん (toshokan - library) as the location where the action of reading takes place."
       },
@@ -1206,11 +1257,11 @@ export const thirtyDayPlan: LessonDay[] = [
         id: 'd23-fill-blank-to',
         type: ContentBlockType.FILL_IN_THE_BLANK_EXERCISE,
         title: 'Particle Practice (と)',
-        sentenceParts: ["きのう、やまださん", "テニスをしました。"], // Kinou, Yamada-san TO tenisu o shimashita.
+        sentenceParts: ["きのう、やまださん", "テニスをしました。"], 
         correctAnswer: "と",
         explanation: "The particle と (to) is used here to indicate accompaniment - doing tennis *with* Yamada-san."
       },
-      { id: 'd23-gemini-practice', type: ContentBlockType.GEMINI_PRACTICE, title: 'AI Sentence Construction (で & と)', instructionText: 'Try to make a Japanese sentence meaning: "I study Japanese with my friend at the library." (library = としょかん toshokan, Japanese language = にほんご nihongo, to study = べんきょうします benkyō shimasu)', geminiPrompt: 'The user is trying to say "I study Japanese with my friend at the library." Evaluate their sentence, paying attention to the use of particles で and と.', requiresUserInput: true, placeholder: 'Watashi wa toshokan de tomodachi to nihongo o benkyō shimasu.' },
+      // ADD DAY 23 FACT HERE
     ],
   },
   // Day 24: More Kanji & Reading Practice
@@ -1222,7 +1273,7 @@ export const thirtyDayPlan: LessonDay[] = [
     contentBlocks: [
       { id: 'd24-intro', type: ContentBlockType.TEXT, title: 'Descriptive Kanji & Reading Time!', markdownContent: 'Let\'s learn Kanji that help describe things and then try to read a short passage putting it all together!' },
       {
-        id: 'd24-kanji-set3', type: ContentBlockType.KANA_INFO, kanaSet: 'katakana', /* Repurposing for Kanji */ title: 'Kanji Set 3: Sizes & Position',
+        id: 'd24-kanji-set3', type: ContentBlockType.KANA_INFO, kanaSet: 'katakana', title: 'Kanji Set 3: Sizes & Position',
         introduction: 'These Kanji are very common for describing objects and their relative positions.',
         characters: kanjiSet3_SizesPosition
       },
@@ -1242,15 +1293,15 @@ export const thirtyDayPlan: LessonDay[] = [
         id: 'd24-writing-practice-dai',
         type: ContentBlockType.WRITING_PRACTICE,
         title: 'Writing Practice: 大 (big)',
-        characterToPractice: kanjiSet3_SizesPosition.find(c => c.char === '大')!,
+        characterToPractice: getCharOrThrow(kanjiSet3_SizesPosition, '大', "Day 24 '大' writing practice"),
         instructions: "Practice writing the Kanji for 'big' (おおきい - ookii, ダイ - dai, タイ - tai).",
-        guidanceImageUrl: kanjiSet3_SizesPosition.find(c => c.char === '大')?.strokeOrderDiagramUrl
+        guidanceImageUrl: getCharOrThrow(kanjiSet3_SizesPosition, '大', "Day 24 '大' writing practice").strokeOrderDiagramUrl
       },
       {
         id: 'd24-reading-practice', type: ContentBlockType.TEXT, title: 'Reading Practice!',
         markdownContent: '読んでみましょう！ (Yonde mimashou! - Let\'s try reading!)\n\nきのう、わたしはともだちとまちへいきました。\nわたしたちはあたらしいレストランでひるごはんをたべました。\nそのレストランのおおきいテーブルのうえにきれいなはながありました。\nわたしはちいさいパンとコーヒーをちゅうもんしました。\nともだちはさかなをたべました。\nとてもおいしかったです。\n\n**Vocabulary Help:**\nひるごはん (hirugohan) - lunch\nテーブル (teeburu) - table\nありました (arimashita) - there was (existence, past)\nさかな (sakana) - fish\nとても (totemo) - very'
       },
-      { id: 'd24-gemini-practice', type: ContentBlockType.GEMINI_PRACTICE, title: 'AI Reading Comprehension', instructionText: 'After reading the passage, ask Gemini a simple question about it in English (e.g., "Where did they eat?"). Gemini will answer based on the text.', geminiPrompt: 'The user has read the following Japanese passage:\n"きのう、わたしはともだちとまちへいきました。\nわたしたちはあたらしいレストランでひるごはんをたべました。\nそのレストランのおおきいテーブルのうえにきれいなはながありました。\nわたしはちいさいパンとコーヒーをちゅうもんしました。\nともだちはさかなをたべました。\nとてもおいしかったです。"\n\nThe user will ask a comprehension question in English about this passage. Answer it based *only* on the provided text. For example, if user asks "What did the friend drink?", the correct answer is "The passage doesn\'t say what the friend drank."\n\nUser\'s question:', requiresUserInput: true, placeholder: 'What was on the big table?' },
+      // ADD DAY 24 FACT HERE
     ],
   },
   // Day 25: Particle に (Time, Location, Destination) & More Kanji
@@ -1272,7 +1323,7 @@ export const thirtyDayPlan: LessonDay[] = [
         ]
       },
       {
-        id: 'd25-kanji-set4', type: ContentBlockType.KANA_INFO, kanaSet: 'katakana', /* Using 'katakana' as placeholder for Kanji rendering */ title: 'Kanji Set 4: Directions & Places',
+        id: 'd25-kanji-set4', type: ContentBlockType.KANA_INFO, kanaSet: 'katakana', title: 'Kanji Set 4: Directions & Places',
         introduction: 'These Kanji will help you describe locations and directions, often used with particles like に.',
         characters: kanjiSet4_DirectionsPlaces
       },
@@ -1291,19 +1342,19 @@ export const thirtyDayPlan: LessonDay[] = [
         id: 'd25-writing-practice-higashi',
         type: ContentBlockType.WRITING_PRACTICE,
         title: 'Writing Practice: 東 (east)',
-        characterToPractice: kanjiSet4_DirectionsPlaces.find(c => c.char === '東')!,
+        characterToPractice: getCharOrThrow(kanjiSet4_DirectionsPlaces, '東', "Day 25 '東' writing practice"),
         instructions: "Practice writing the Kanji for 'east' (ひがし - higashi, トウ - tou).",
-        guidanceImageUrl: kanjiSet4_DirectionsPlaces.find(c => c.char === '東')?.strokeOrderDiagramUrl
+        guidanceImageUrl: getCharOrThrow(kanjiSet4_DirectionsPlaces, '東', "Day 25 '東' writing practice").strokeOrderDiagramUrl
       },
       {
         id: 'd25-fill-blank-ni',
         type: ContentBlockType.FILL_IN_THE_BLANK_EXERCISE,
         title: 'Particle Practice (に)',
-        sentenceParts: ["まいあさ、しちじ", "おきます。"], // Maiasa, shichi-ji NI okimasu.
+        sentenceParts: ["まいあさ、しちじ", "おきます。"], 
         correctAnswer: "に",
         explanation: "The particle に (ni) is used here to mark a specific point in time (7 o'clock) when the action of waking up occurs."
       },
-      { id: 'd25-gemini-practice', type: ContentBlockType.GEMINI_PRACTICE, title: 'AI Sentence Building with に', instructionText: 'Describe where your book is. For example, "My book is on the desk." (desk = つくえ, on = うえ, book = ほん, exists = あります)', geminiPrompt: 'The user wants to say where their book is, e.g., "My book is on the desk." Evaluate their Japanese sentence, focusing on the use of particle に for location of existence.', requiresUserInput: true, placeholder: 'わたしのほんはつくえのうえにあります。' },
+      // ADD DAY 25 FACT HERE
     ],
   },
   // Day 26: Particles へ (Direction) & を (Object Marker)
@@ -1332,7 +1383,7 @@ export const thirtyDayPlan: LessonDay[] = [
         ]
       },
       {
-        id: 'd26-kanji-set5', type: ContentBlockType.KANA_INFO, kanaSet: 'katakana', /* Using 'katakana' as placeholder for Kanji rendering */ title: 'Kanji Set 5: Verbs & Actions',
+        id: 'd26-kanji-set5', type: ContentBlockType.KANA_INFO, kanaSet: 'katakana', title: 'Kanji Set 5: Verbs & Actions',
         introduction: 'These Kanji are commonly found in verbs and words related to actions, often taking the particle を.',
         characters: kanjiSet5_VerbsActions
       },
@@ -1349,19 +1400,19 @@ export const thirtyDayPlan: LessonDay[] = [
         id: 'd26-writing-practice-mi',
         type: ContentBlockType.WRITING_PRACTICE,
         title: 'Writing Practice: 見 (to see)',
-        characterToPractice: kanjiSet5_VerbsActions.find(c => c.char === '見')!,
+        characterToPractice: getCharOrThrow(kanjiSet5_VerbsActions, '見', "Day 26 '見' writing practice"),
         instructions: "Practice writing the Kanji for 'to see' (みる - miru, ケン - ken).",
-        guidanceImageUrl: kanjiSet5_VerbsActions.find(c => c.char === '見')?.strokeOrderDiagramUrl
+        guidanceImageUrl: getCharOrThrow(kanjiSet5_VerbsActions, '見', "Day 26 '見' writing practice").strokeOrderDiagramUrl
       },
       {
         id: 'd26-fill-blank-o',
         type: ContentBlockType.FILL_IN_THE_BLANK_EXERCISE,
         title: 'Particle Practice (を)',
-        sentenceParts: ["まいにち、テレビ", "みます。"], // Mainichi, terebi O mimasu.
+        sentenceParts: ["まいにち、テレビ", "みます。"], 
         correctAnswer: "を",
         explanation: "The particle を (o) is used here to mark テレビ (terebi - TV) as the direct object of the verb みます (mimasu - to watch)."
       },
-      { id: 'd26-gemini-practice', type: ContentBlockType.GEMINI_PRACTICE, title: 'AI "What do you do?"', instructionText: 'Tell Gemini in Japanese what you read or watch. E.g., "I read books." or "I watch anime."', geminiPrompt: 'The user is describing what they read or watch, likely using the を (o) particle. Evaluate their sentence.', requiresUserInput: true, placeholder: 'ほんをよみます。 (Hon o yomimasu.)' },
+      // ADD DAY 26 FACT HERE
     ],
   },
   // Day 27: い-Adjectives (Past & Negative Conjugation)
@@ -1383,7 +1434,7 @@ export const thirtyDayPlan: LessonDay[] = [
         ]
       },
       {
-        id: 'd27-kanji-set6', type: ContentBlockType.KANA_INFO, kanaSet: 'katakana', /* Using 'katakana' as placeholder for Kanji rendering */ title: 'Kanji Set 6: Descriptive Adjectives',
+        id: 'd27-kanji-set6', type: ContentBlockType.KANA_INFO, kanaSet: 'katakana', title: 'Kanji Set 6: Descriptive Adjectives',
         introduction: 'These Kanji are often found in adjectives that describe qualities like newness, age, quantity, and price.',
         characters: kanjiSet6_Adjectives
       },
@@ -1401,19 +1452,19 @@ export const thirtyDayPlan: LessonDay[] = [
         id: 'd27-writing-practice-atarashii',
         type: ContentBlockType.WRITING_PRACTICE,
         title: 'Writing Practice: 新 (new)',
-        characterToPractice: kanjiSet6_Adjectives.find(c => c.char === '新')!,
+        characterToPractice: getCharOrThrow(kanjiSet6_Adjectives, '新', "Day 27 '新' writing practice"),
         instructions: "Practice writing the Kanji for 'new' (あたらしい - atarashii, シン - shin).",
-        guidanceImageUrl: kanjiSet6_Adjectives.find(c => c.char === '新')?.strokeOrderDiagramUrl
+        guidanceImageUrl: getCharOrThrow(kanjiSet6_Adjectives, '新', "Day 27 '新' writing practice").strokeOrderDiagramUrl
       },
       {
         id: 'd27-fill-blank-i-adj',
         type: ContentBlockType.FILL_IN_THE_BLANK_EXERCISE,
         title: 'Adjective Conjugation Practice',
-        sentenceParts: ["きのうはとても", "でした。 (さむい)"], // Kinou wa totemo SAMUKATTA desu. (samui - cold)
+        sentenceParts: ["きのうはとても", "でした。 (さむい)"], 
         correctAnswer: "さむかった",
         explanation: "For the い-adjective さむい (samui - cold), the past affirmative is さむかったです (samukatta desu). Drop い, add かったです."
       },
-      { id: 'd27-gemini-practice', type: ContentBlockType.GEMINI_PRACTICE, title: 'AI "How was it?"', instructionText: 'Tell Gemini how your day was yesterday using an い-adjective in the past tense (e.g., "Yesterday was fun," "Yesterday was busy," "Yesterday was not cold").', geminiPrompt: 'The user is describing their day yesterday using an い-adjective in the past tense. Evaluate their sentence.', requiresUserInput: true, placeholder: 'Kinō wa tanoshikatta desu.' },
+      // ADD DAY 27 FACT HERE
     ],
   },
   // Day 28: Combining Sentences (～て form introduction - for listing actions)
@@ -1427,7 +1478,7 @@ export const thirtyDayPlan: LessonDay[] = [
       {
         id: 'd28-grammar-what-is-te', type: ContentBlockType.GRAMMAR_EXPLANATION, title: 'What is the Te-Form?',
         explanation: 'The te-form (て形 - tekei) helps link clauses. When used to list actions, it generally implies a sequence: "do A, then do B, then do C."\nFor example: 朝起きて、ご飯を食べて、学校へ行きました。(Asa okite, gohan o tabete, gakkou e ikimashita.) - I woke up in the morning, ate a meal, and went to school.',
-        exampleSentences: [] // Examples will be after conjugation rules
+        exampleSentences: [] 
       },
       {
         id: 'd28-grammar-te-conjugation', type: ContentBlockType.GRAMMAR_EXPLANATION, title: 'Basic Te-Form Conjugation Rules',
@@ -1450,7 +1501,7 @@ export const thirtyDayPlan: LessonDay[] = [
       {
         id: 'd28-kanji-set-iku', type: ContentBlockType.KANA_INFO, kanaSet: 'katakana', title: 'Kanji Spotlight: 行 (to go)',
         introduction: 'The Kanji 行 is very common and means "to go", "journey", or "carry out". Its te-form is an exception: 行って (itte).',
-        characters: [kanjiSet7_ActionsMisc.find(k => k.char === '行')!].filter(Boolean) as KanaCharacter[]
+        characters: [getCharOrThrow(kanjiSet7_ActionsMisc, '行', "Day 28 Kanji Spotlight '行'")].filter(Boolean) as KanaCharacter[]
       },
       {
         id: 'd28-vocab-verbs', type: ContentBlockType.VOCABULARY_LIST, title: 'Common Verbs for Te-Form Practice', items: [
@@ -1467,11 +1518,11 @@ export const thirtyDayPlan: LessonDay[] = [
         id: 'd28-fill-blank-te',
         type: ContentBlockType.FILL_IN_THE_BLANK_EXERCISE,
         title: 'Te-Form Conjugation',
-        sentenceParts: ["ほんを (よむ)", "、おんがくをききました。"], // Hon o YONDE, ongaku o kikimashita.
+        sentenceParts: ["ほんを (よむ)", "、おんがくをききました。"], 
         correctAnswer: "よんで",
         explanation: "よむ (yomu) is a Group 1 verb ending in -mu. Its te-form is よんで (yonde)."
       },
-      { id: 'd28-gemini-practice', type: ContentBlockType.GEMINI_PRACTICE, title: 'AI: Your Daily Routine', instructionText: 'Describe three things you did this morning in sequence, using the te-form for the first two actions and past tense for the last. E.g., "I woke up, drank coffee, and read the news."', geminiPrompt: 'The user is describing their morning routine using te-form for sequential actions. Evaluate their Japanese sentence construction. Example: 「起きて、コーヒーを飲んで、ニュースを読みました。」', requiresUserInput: true, placeholder: 'Okite, koohii o nonde, nyuusu o yomimashita.' },
+      // ADD DAY 28 FACT HERE
     ],
   },
   // Day 29: Expressing "Want" (～たいです) & Hobby
@@ -1505,9 +1556,9 @@ export const thirtyDayPlan: LessonDay[] = [
         id: 'd29-kanji-set-actions', type: ContentBlockType.KANA_INFO, kanaSet: 'katakana', title: 'Kanji Spotlight: Likes & Actions',
         introduction: 'These Kanji relate to desires and common hobby actions.',
         characters: [
-          kanjiSet7_ActionsMisc.find(k => k.char === '買')!,
-          kanjiSet7_ActionsMisc.find(k => k.char === '旅')!,
-          kanjiSet7_ActionsMisc.find(k => k.char === '好')!,
+          getCharOrThrow(kanjiSet7_ActionsMisc, '買', "Day 29 Kanji Spotlight '買'"),
+          getCharOrThrow(kanjiSet7_ActionsMisc, '旅', "Day 29 Kanji Spotlight '旅'"),
+          getCharOrThrow(kanjiSet7_ActionsMisc, '好', "Day 29 Kanji Spotlight '好'"),
         ].filter(Boolean) as KanaCharacter[]
       },
       {
@@ -1526,11 +1577,11 @@ export const thirtyDayPlan: LessonDay[] = [
         id: 'd29-fill-blank-tai',
         type: ContentBlockType.FILL_IN_THE_BLANK_EXERCISE,
         title: 'Expressing Desire',
-        sentenceParts: ["ラーメンが", "です。 (たべます)"], // Raamen ga TABETAI desu.
+        sentenceParts: ["ラーメンが", "です。 (たべます)"], 
         correctAnswer: "たべたい",
         explanation: "To say 'want to eat ramen', take the stem of 食べます (tabemasu) which is 食べ (tabe-), and add たい (tai)."
       },
-      { id: 'd29-gemini-practice', type: ContentBlockType.GEMINI_PRACTICE, title: 'AI: What are your interests?', instructionText: 'Tell Gemini what you want to do and what your hobby is. For example, "I want to travel. My hobby is reading."', geminiPrompt: 'The user is talking about what they want to do (using ～たいです) and their hobbies (using しゅみは～です). Evaluate their Japanese sentences.', requiresUserInput: true, placeholder: 'Ryokou o shitai desu. Watashi no shumi wa dokusho desu.' },
+      // ADD DAY 29 FACT HERE
     ],
   },
   // Day 30: Grand Review & Next Steps
@@ -1555,9 +1606,62 @@ export const thirtyDayPlan: LessonDay[] = [
       },
       { id: 'd30-next-steps', type: ContentBlockType.TEXT, title: 'これからの道 (Korekara no Michi) - The Road Ahead', markdownContent: 'Your Japanese learning journey has just begun! Here are some suggestions for what to do next:\n\n**1. Deepen Your Grammar:**\n   - Explore more verb conjugations (dictionary form, nai-form, ta-form, conditional forms like ば, たら, なら).\n   - Learn about different levels of politeness (plain form vs. polite form vs. honorific/humble).\n   - Study more complex sentence structures and connecting particles.\n\n**2. Expand Your Kanji:**\n   - Aim to learn the Jōyō Kanji (常用漢字 - around 2000 characters taught in Japanese schools).\n   - Use resources like WaniKani, Anki decks, or Kanji textbooks.\n\n**3. Build Your Vocabulary:**\n   - Continue learning new words daily. Use flashcards (Anki) and context (reading, listening).\n\n**4. Practice, Practice, Practice:**\n   - **Reading:** Start with graded readers, children\'s books, simple manga, or news articles for learners.\n   - **Listening:** Japanese music, podcasts for learners, anime (with/without subtitles), Japanese TV shows.\n   - **Speaking:** Find a language exchange partner, a tutor, or join a conversation group. Don\'t be afraid to make mistakes!\n   - **Writing:** Keep a simple journal in Japanese, try writing short stories or essays.\n\n**5. Recommended Resources:**\n   - Textbooks: Genki, Minna no Nihongo, Japanese From Zero!\n   - Apps: Anki (flashcards), Duolingo (supplementary), Bunpro (grammar SRS), WaniKani (Kanji SRS), Lingodeer.\n   - Websites: Tae Kim\'s Guide to Learning Japanese, Maggie Sensei, Jisho.org (dictionary).\n\n**6. Set Goals & Stay Consistent:**\n   - Decide what you want to achieve (e.g., pass JLPT N5/N4, watch anime without subtitles, travel to Japan).\n   - Make learning a regular habit, even if it\'s just for 15-30 minutes a day.' },
       { id: 'd30-culture', type: ContentBlockType.CULTURAL_NOTE, title: '生涯学習 (Shōgai Gakushū) - Lifelong Learning', note: 'In Japan, there is a strong emphasis on 生涯学習 (shōgai gakushū), or lifelong learning. The pursuit of knowledge and new skills is valued throughout one\'s life. Embrace this spirit as you continue your Japanese studies! The journey is long but incredibly rewarding.' },
-      { id: 'd30-gemini-practice', type: ContentBlockType.GEMINI_PRACTICE, title: 'AI: Your Japanese Introduction', instructionText: 'Introduce yourself briefly in Japanese. Include your name, something you like, and perhaps something you want to do in the future using Japanese (e.g., "I want to go to Japan").', geminiPrompt: 'The user is providing a self-introduction in Japanese. Evaluate its basic correctness and provide encouragement for their continued learning journey.', requiresUserInput: true, placeholder: 'Hajimemashite. [Your Name] desu. Ryokou ga suki desu. Mirai, Nihon e ikitai desu. Yoroshiku onegaishimasu.' },
+      // ADD DAY 30 FACT HERE
     ],
   }
 ];
 
-thirtyDayPlan.sort((a, b) => a.day - b.day);
+
+export const thirtyDayPlan: LessonDay[] = thirtyDayPlan_Unprocessed.map(lessonDay => {
+  const contentBlocksWithoutOldPractice = lessonDay.contentBlocks.filter(block => 
+    block.type !== ContentBlockType.GEMINI_PRACTICE && 
+    block.type !== ContentBlockType.PRONUNCIATION_PRACTICE
+  );
+
+  // Separate InterestingFact blocks
+  const interestingFactBlocks = contentBlocksWithoutOldPractice.filter(b => b.type === ContentBlockType.INTERESTING_FACT);
+  let regularBlocks = contentBlocksWithoutOldPractice.filter(b => b.type !== ContentBlockType.INTERESTING_FACT);
+
+
+  const aiTutorBlock: AiTutorStreamContentBlock = {
+    id: `d${lessonDay.day}-ai-tutor-stream`,
+    type: ContentBlockType.AI_TUTOR_STREAM,
+    title: 'Talk to Sensei Live',
+    initialSystemPrompt: generateAiTutorPrompt(lessonDay.day, lessonDay.title, lessonDay.overview),
+    placeholderText: "Ask Sakura Sensei anything or practice your Japanese...",
+  };
+
+  let insertionIndex = regularBlocks.length;
+  const culturalNoteIndex = regularBlocks.findIndex(b => b.type === ContentBlockType.CULTURAL_NOTE);
+  if (culturalNoteIndex !== -1) {
+    insertionIndex = culturalNoteIndex; // Insert AI Tutor before Cultural Note if it exists
+  } else {
+    // If no cultural note, find the last "learning" block to insert AI Tutor after
+    const learningBlockTypes = [
+        ContentBlockType.KANA_INFO, ContentBlockType.VOCABULARY_LIST, 
+        ContentBlockType.GRAMMAR_EXPLANATION, ContentBlockType.FILL_IN_THE_BLANK_EXERCISE, 
+        ContentBlockType.WRITING_PRACTICE, ContentBlockType.TEXT
+    ];
+    let lastLearningBlockIndex = -1;
+    regularBlocks.forEach((block, index) => {
+      if (learningBlockTypes.includes(block.type)) {
+        lastLearningBlockIndex = index;
+      }
+    });
+    if (lastLearningBlockIndex !== -1) {
+      insertionIndex = lastLearningBlockIndex + 1;
+    }
+  }
+  
+  const processedContentBlocks = [...regularBlocks];
+  processedContentBlocks.splice(insertionIndex, 0, aiTutorBlock);
+
+  // Add InterestingFact blocks at the very end
+  processedContentBlocks.push(...interestingFactBlocks);
+
+
+  return {
+    ...lessonDay,
+    contentBlocks: processedContentBlocks,
+  };
+}).sort((a, b) => a.day - b.day);
