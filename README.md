@@ -82,6 +82,12 @@ Happy Learning! がんばってください (Ganbatte kudasai - Good luck / Do y
 [Nihongo.site](https://nihongo.site)
 
 
+## Credits
+
+* Gemini Code assistant by [Google AI Studio](https://aistudio.google.com/) 
+* The original kanjis and kanas source are from the [KanjiVG](https://kanjivg.tagaini.net/) project
+* The images are generated with the project [Kanimaji](https://maurimo.github.io/kanimaji/index.html) with some modifications [available here](https://github.com/jcsirot/kanimaji)
+
 ## License
 
 [MIT](/LICENSE)
